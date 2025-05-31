@@ -40,9 +40,8 @@ class RekamMedisAdmin(admin.ModelAdmin):
     )
     ordering = ('-created_at',)
     readonly_fields = [
-        'registrasi', 'created_at', 'keluhan_utama', 'catatan',
-        'riwayat_penyakit', 'riwayat_alergi', 'kode_diagnosis',
-        'ringkasan_rekam_medis'
+        'registrasi', 'created_at', 'keluhan_utama',
+        'riwayat_penyakit', 'riwayat_alergi', 'kode_diagnosis'
     ]
 
     @admin.display(description="Detail Rekam Medis")
