@@ -50,15 +50,15 @@ class RekamMedisAdmin(admin.ModelAdmin):
         url = f"/admin/core/rekammedis/{obj.id}/change/"
         return format_html(f'<a class="button" href="{url}">Lihat</a>')
     
-    # @admin.display(description="Ringkasan Rekam Medis")
-    # def ringkasan_rekam_medis(self, obj):
-    #     from django.utils.html import format_html
-    #     return format_html(
-    #         "<strong>Keluhan:</strong> {}<br><strong>Diagnosis:</strong> {}<br><strong>Terapi:</strong> {}",
-    #         obj.keluhan_utama or "-",
-    #         obj.kode_diagnosis.deskripsi if obj.kode_diagnosis else "-",
-    #         ", ".join([str(o.obat) for o in obj.obat_diberikan.all()]) or "-"
-    #     )
+    @admin.display(description="Ringkasan Rekam Medis")
+    def ringkasan_rekam_medis(self, obj):
+        from django.utils.html import format_html
+        return format_html(
+            "<strong>Keluhan:</strong> {}<br><strong>Diagnosis:</strong> {}<br><strong>Terapi:</strong> {}",
+            obj.keluhan_utama or "-",
+            obj.kode_diagnosis.deskripsi if obj.kode_diagnosis else "-",
+            ", ".join([str(o.obat) for o in obj.obat_diberikan.all()]) or "-"
+        )
 
     @admin.display(description="Registrasi")
     def registrasi_link(self, obj):
