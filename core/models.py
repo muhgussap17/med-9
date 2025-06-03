@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import date
 
-# ~~~ Model TextChoice ~~~
+########## Model TextChoice ##########
 class AgamaChoices(models.TextChoices):
     ISLAM = 'islam', 'Islam'
     KRISTEN_PROTESTAN = 'kristen_protestan', 'Kristen Protestan'
@@ -80,21 +80,22 @@ class StatusKesadaranChoices(models.TextChoices):
     SOPOR = 'SP', 'Sopor'
     COMA = 'C', 'Coma'
 
-# ~~~ Model Master Data ~~~
+########## Model Master Data Wajib ##########
 class ICD10(models.Model): # Kode Diagnosa
     kode = models.CharField(max_length=10, unique=True)
-    deskripsi = models.CharField()
+    deskripsi = models.CharField(max_length=255)
+    bab = models.CharField(max_length=100, blank=True, null=True)  # Contoh: "Penyakit Infeksi dan Parasit"
 
     def __str__(self):
         return f"{self.kode} - {self.deskripsi[:50]}"
 
     class Meta:
         verbose_name_plural = 'Master Data ICD-10'
-        unique_together = ('kode', 'deskripsi')
+        unique_together = ('bab', 'kode', 'deskripsi')
 
 class Penyakit(models.Model): # Jenis Penyakit untuk Riwayat Penyakit
     jenis = models.CharField()
-    deskripsi = models.CharField()
+    deskripsi = models.CharField(max_length=255)
 
     def __str__(self):
         return f"{self.jenis} - {self.deskripsi[:50]}"
@@ -104,7 +105,7 @@ class Penyakit(models.Model): # Jenis Penyakit untuk Riwayat Penyakit
 
 class Alergi(models.Model): # Jenis Alergi untuk Riwayat Alergi
     jenis = models.CharField()
-    deskripsi = models.CharField()
+    deskripsi = models.CharField(max_length=255)
 
     def __str__(self):
         return f"{self.jenis} - {self.deskripsi[:50]}"
@@ -112,16 +113,8 @@ class Alergi(models.Model): # Jenis Alergi untuk Riwayat Alergi
     class Meta:
         verbose_name_plural = 'Master Data Jenis Alergi'
 
-class Layanan(models.Model):
-    nama = models.CharField(max_length=255)
-    harga = models.DecimalField(max_digits=10, decimal_places=2)
 
-    def __str__(self):
-        return self.nama
-    
-    class Meta:
-        verbose_name_plural = 'Master Data Layanan'
-
+########## Model Master Data Tambahaan ##########
 class Obat(models.Model):
     class JenisObat(models.TextChoices):
         TABLET = 'tablet', 'Tablet'
@@ -150,6 +143,7 @@ class Obat(models.Model):
     dosis_nilai = models.PositiveIntegerField(default=1, help_text="Contoh: 500, 5, dll")
     dosis_satuan = models.CharField(max_length=20, choices=SatuanDosis.choices)
     keterangan = models.TextField(blank=True, null=True, help_text="Contoh: Aturan pakai, efek samping, dll")
+    # harga = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
         return f"{self.nama} ({self.dosis_nilai} {self.dosis_satuan})"
@@ -160,6 +154,7 @@ class Obat(models.Model):
 
 class Vaksin(models.Model):
     nama = models.CharField(max_length=255)
+    harga = models.DecimalField(max_digits=10, decimal_places=2)
     def __str__(self):
         return self.nama
 
@@ -167,15 +162,17 @@ class Vaksin(models.Model):
         verbose_name_plural = 'Master Data Vaksin'
 
 class Tindakan(models.Model):
+    kode = models.CharField(max_length=20, blank=True, null=True)
+    kategori = models.CharField(max_length=100, blank=True, null=True)
     nama = models.CharField(max_length=255)
-    harga = models.DecimalField(max_digits=10, decimal_places=2)
+    # harga = models.DecimalField(max_digits=10, decimal_places=2)
     def __str__(self):
         return self.nama
 
     class Meta:
         verbose_name_plural = 'Master Data Tindakan'
 
-# ~~~ Model Main ~~~
+########## Model Utama ##########
 # === PASIEN ===
 class Pasien(models.Model): # Diisi oleh Admisi/Resepsionis, Digunakan hanya untuk menambahkan pasien baru dan membuat registrasi pemeriksaan.
     # --- Data Identitas Wajib (Sesuai PMK) ---
@@ -294,7 +291,7 @@ class RekamMedis(models.Model):
         verbose_name_plural = 'Rekam Medis'
         ordering = ['-created_at']
 
-# === RELASI MANY TO MANY REKAM MEDIS DAN OBAT ===
+# === RELASI MANY TO MANY REKAM MEDIS ===
 class RekamMedisObat(models.Model):
     rekam_medis = models.ForeignKey(
         'RekamMedis',
@@ -324,18 +321,6 @@ class RekamMedisObat(models.Model):
         verbose_name = 'Obat dalam Rekam Medis'
         verbose_name_plural = 'Tambahkan Obat'
         ordering = ['rekam_medis', 'obat']
-
-class RekamMedisLayanan(models.Model):
-    rekam_medis = models.ForeignKey(RekamMedis, on_delete=models.CASCADE, related_name='layanan_diberikan')
-    layanan = models.ForeignKey(Layanan, on_delete=models.PROTECT)
-    catatan = models.CharField(max_length=255, blank=True, null=True)  # opsional
-
-    def __str__(self):
-        return f"{self.layanan.nama} untuk {self.rekam_medis.registrasi.pasien.nama_lengkap}"
-
-    class Meta:
-        verbose_name = 'Layanan dalam Rekam Medis'
-        verbose_name_plural = 'Tambahkan Layanan'
 
 class RekamMedisTindakan(models.Model):
     rekam_medis = models.ForeignKey(RekamMedis, on_delete=models.CASCADE, related_name='tindakan_diberikan')
