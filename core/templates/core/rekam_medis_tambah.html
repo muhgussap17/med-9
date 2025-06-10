@@ -1,0 +1,522 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<!-- Header -->
+<div class="header pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Breadcrumb -->
+            <div class="row align-items-center pt-4 pb-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-default d-inline-block mb-0">
+                        {{ page_title|default:"Judul Halaman" }}
+                    </h6>
+                    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home text-default"></i></a>
+                            </li>
+                            {% if breadcrumbs %}
+                                {% for item in breadcrumbs %}
+                                    {% if forloop.last %}
+                                        <li class="breadcrumb-item text-default active" aria-current="page">{{ item.title }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item">
+                                            <a href="{{ item.url }}" class="text-default">{{ item.title }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Header -->
+<!-- Page content -->
+<div class="container-fluid mt--6">
+    <!-- Form Tambah Pasien -->
+    <!-- Filter Status -->
+    <ul class="nav nav-tabs border-1 mb-3" id="statusTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link" href="#">Resume Medis</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Riwayat Konsultasi</a>
+        </li>
+    </ul>
+    <!-- End Filter -->
+    <div class="row">
+        <!-- Kolom Utama -->
+        <div class="col-12 col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-muted">DATA PASIEN</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="nama_lengkap" class="form-control-label mb-0">Nama Lengkap</label>
+                            <p>{{ pasien.nama_lengkap }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="no_rm" class="form-control-label mb-0">No. Rekam Medis</label>
+                            <p>{{ pasien.no_rm }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <!-- SUBJECTIVE -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0 text-muted">SUBJECTIVE</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <h5 class="mb-2 text-muted">DATA UMUM</h5>
+                                <label for="tanggal_lahir" class="form-control-label mb-0">Tanggal Lahir</label>
+                                <p>{{ pasien.tanggal_lahir|date:"j F Y" }} <span class="text-muted">({{ pasien.umur_tahun }})</span></p>
+                                <label for="jenis_kelamin" class="form-control-label mb-0">Jenis Kelamin</label>
+                                <p>{{ pasien.get_jenis_kelamin_display|default:"-" }}</p>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <h5 class="mb-2 text-muted">DATA KESEHATAN</h5>
+                                <label for="status_merokok" class="form-control-label mb-0">Status Merokok</label>
+                                <p>{{ pasien.get_status_merokok_display|default:"-" }}</p>
+                                <label for="golongan_darah" class="form-control-label mb-0">Golongan Darah</label>
+                                <p>{{ pasien.get_golongan_darah_display|default:"-" }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Anamnesa -->
+                        <h5 class="mb-2 text-muted">ANAMNESA</h5>
+                        <!-- Keluhan Utama -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="keluhan_utama" class="form-control-label">Keluhan Utama <span class="text-danger">*</span></label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="keluhan_utama" 
+                                        name="keluhan_utama" 
+                                        value="{{ form.keluhan_utama.value|default:'' }}" 
+                                        placeholder="Masukkan keluhan" required>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Riwayat Penyakit -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="riwayat_penyakit" class="form-control-label">Riwayat Penyakit</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="riwayat_penyakit" 
+                                        name="riwayat_penyakit" 
+                                        value="{{ form.riwayat_penyakit.value|default:'' }}" 
+                                        placeholder="Masukkan riwayat penyakit">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Riwayat Alergi -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="riwayat_alergi" class="form-control-label">Riwayat Alergi</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="riwayat_alergi" 
+                                        name="riwayat_alergi" 
+                                        value="{{ form.riwayat_alergi.value|default:'' }}" 
+                                        placeholder="Masukkan riwayat alergi">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END SUBJECTIVE -->
+
+                <!-- OBJECTIVE -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0 text-muted">OBJECTIVE</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Status Kesadaran -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="status_kesadaran" class="form-control-label">Status Kesadaran <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="status_kesadaran" name="status_kesadaran" required>
+                                        {% for key, label in status_kesadaran_choices %}
+                                            <option value="{{ key }}" {% if form.status_kesadaran.value == key %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <!-- Tanda-tanda Vital -->
+                        <table class="table align-items-center table-flush">                         
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Tanda-tanda vital</th>
+                                    {% if rekam_sebelumnya %}
+                                    <th>{{ rekam_sebelumnya.created_at|date:"d M y" }}</th>
+                                    {% else %}
+                                    <th></th>
+                                    {% endif %}
+                                    <th>Hari Ini</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="align-middle">Suhu Tubuh</td>
+                                    <td class="col-12 col-md-2 align-middle">{{ rekam_sebelumnya.suhu_tubuh|default:"" }}</td>
+                                    <td class="col-12 col-md-2">
+                                      <div class="input-group">
+                                        <input type="number" step="0.1" min="30" max="45" class="form-control" id="suhu_tubuh" name="suhu_tubuh" placeholder="°C" required>
+                                      </div>
+                                    </td>
+                                  </tr>
+                          
+                                  <tr>
+                                    <td class="align-middle">Sistole</td>
+                                    <td class="align-middle">{{ rekam_sebelumnya.sistole|default:"" }}</td>
+                                    <td>
+                                      <div class="input-group">
+                                        <input type="number" min="60" max="200" class="form-control" id="sistole" name="sistole" placeholder="mmHg" required>
+                                      </div>
+                                    </td>
+                                  </tr>
+                          
+                                  <tr>
+                                    <td class="align-middle">Diastole</td>
+                                    <td class="align-middle">{{ rekam_sebelumnya.diastole|default:"" }}</td>
+                                    <td>
+                                      <div class="input-group">
+                                        <input type="number" min="40" max="150" class="form-control" id="diastole" name="diastole" placeholder="mmHg" required>
+                                      </div>
+                                    </td>
+                                  </tr>
+                          
+                                  <tr>
+                                    <td class="align-middle">Nadi</td>
+                                    <td class="align-middle">{{ rekam_sebelumnya.nadi|default:"" }}</td>
+                                    <td>
+                                      <div class="input-group">
+                                        <input type="number" min="40" max="200" class="form-control" id="nadi" name="nadi" placeholder="x/menit" required>
+                                      </div>
+                                    </td>
+                                  </tr>
+                          
+                                  <tr>
+                                    <td class="align-middle">Frekuensi Pernapasan</td>
+                                    <td class="align-middle">{{ rekam_sebelumnya.frekuensi_pernafasan|default:"" }}</td>
+                                    <td>
+                                      <div class="input-group">
+                                        <input type="number" min="10" max="60" class="form-control" id="frekuensi_pernafasan" name="frekuensi_pernafasan" placeholder="x/menit" required>
+                                      </div>
+                                    </td>
+                                  </tr>
+                          
+                                  <tr>
+                                    <td class="align-middle">Tinggi Badan</td>
+                                    <td class="align-middle">{{ rekam_sebelumnya.tinggi_badan|default:"" }}</td>
+                                    <td>
+                                      <div class="input-group">
+                                        <input type="number" min="30" max="250" class="form-control" id="tinggi_badan" name="tinggi_badan" placeholder="cm" required>
+                                      </div>
+                                    </td>
+                                  </tr>
+                          
+                                  <tr>
+                                    <td class="align-middle">Berat Badan</td>
+                                    <td class="align-middle">{{ rekam_sebelumnya.berat_badan|default:"" }}</td>
+                                    <td>
+                                      <div class="input-group">
+                                        <input type="number" min="3" max="250" step="0.1" class="form-control" id="berat_badan" name="berat_badan" placeholder="kg" required>
+                                      </div>
+                                    </td>
+                                  </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- END OBJECTIVE -->
+
+                <!-- ASSESSMENT -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0 text-muted">ASSESSMENT</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- ICD-10 -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="kode_diagnosis" class="form-control-label">ICD-10 <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="kode_diagnosis" name="kode_diagnosis">
+                                        <option value="">Pilih</option>
+                                        {% for icd in icd_list %}
+                                        <option value="{{ icd.kode }}">{{ icd.kode }} - {{ icd.nama }}</option>
+                                        {% endfor %}
+                                    </select>                                
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Diagnosis -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="diagnosis" class="form-control-label">Diagnosis <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="diagnosis" name="diagnosis" placeholder="Deskripsi diagnosis">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prognosis -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="prognosis" class="form-control-label">Prognosis <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="prognosis" name="prognosis">
+                                        <option value="" disabled selected hidden>Pilih</option>
+                                        {% for key, label in prognosis_choices %}
+                                            <option value="{{ key }}" {% if form.prognosis.value == key %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>                                  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END ASSESSMENT -->
+
+                <!-- PLAN -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0 text-muted">PLAN</h5>
+                    </div>
+                    <div class="card-body">
+                        {{ formset.management_form }}
+                        <div id="formset-container">
+                            {% for form in formset %}
+                            <div id="resep-obat-form" class="d-none">
+                                <!-- Resep Obat -->
+                                <h5 class="mb-2 text-muted">RESEP OBAT</h5>
+                                <div class="row">
+                                    <div class="col-12 col-md-3 form-group">
+                                        <label for="nama_obat" class="form-control-label">Nama Obat</label>
+                                        <input type="text" class="form-control" id="nama_obat" name="nama_obat" placeholder="Masukkan nama obat">
+                                    </div>
+                                    <div class="col-12 col-md-3 form-group">
+                                        <label for="jumlah" class="form-control-label">Jumlah</label>
+                                        <input type="text" class="form-control" id="jumlah" name="jumlah" placeholder="Masukkan jumlah obat">
+                                    </div>
+                                    <div class="col-12 col-md-3 form-group">
+                                        <label for="bentuk" class="form-control-label">Bentuk</label>
+                                        <select class="form-control" id="bentuk" name="bentuk">
+                                            <option value="" disabled selected hidden>Pilih</option>
+                                            {% for key, label in jenis_obat_choices %}
+                                            <option value="{{ key }}" {% if form.jenis_obat.value == key %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <!-- jika pilih bentuk lainnya maka isi di form -->
+                                        <input type="text" class="form-control mt-2 d-none" id="bentuk_lainnya" name="bentuk_lainnya" placeholder="Masukkan bentuk obat">
+                                    </div>
+                                    <div class="col-12 col-md-3 form-group">
+                                        <label for="dosis_nilai" class="form-control-label">Nilai Dosis</label>
+                                        <input type="text" class="form-control" id="dosis_nilai" name="dosis_nilai" placeholder="Masukkan nilai dosis obat">
+                                    </div>
+                                </div>
+        
+                                <!-- Aturan Pakai -->
+                                <h5 class="mb-2 text-muted">ATURAN PAKAI</h5>
+                                <div class="row">
+                                    <div class="col-12 col-md-4 form-group">
+                                        <label for="frekuensi" class="form-control-label">Frekuensi</label>
+                                        <select class="form-control" id="frekuensi" name="frekuensi">
+                                            <option value="" disabled selected hidden>Pilih</option>
+                                            {% for key, label in frekuensi_minum_choices %}
+                                            <option value="{{ key }}" {% if form.frekuensi_minum.value == key %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <!-- jika pilih bentuk lainnya maka isi di form -->
+                                        <input type="text" class="form-control mt-2 d-none" id="frekuensi_lainnya" name="frekuensi_lainnya" placeholder="Masukkan frekuensi minum obat">
+                                    </div>
+                                    <div class="col-12 col-md-4 form-group">
+                                        <label for="dosis_satuan" class="form-control-label">Dosis Satuan</label>
+                                        <select class="form-control" id="dosis_satuan" name="dosis_satuan">
+                                            <option value="" disabled selected hidden>Pilih</option>
+                                            {% for key, label in satuan_dosis_choices %}
+                                            <option value="{{ key }}" {% if form.satuan_dosis.value == key %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <!-- jika pilih bentuk lainnya maka isi di form -->
+                                        <input type="text" class="form-control mt-2 d-none" id="dosis_satuan_lainnya" name="dosis_satuan_lainnya" placeholder="Masukkan satuan dosis obat">
+                                    </div>
+                                    <div class="col-12 col-md-4 form-group">
+                                        <label for="aturan_pakai" class="form-control-label">Aturan Pakai</label>
+                                        <select class="form-control" id="aturan_pakai" name="aturan_pakai">
+                                            <option value="" disabled selected hidden>Pilih</option>
+                                            {% for key, label in aturan_pakai_choices %}
+                                            <option value="{{ key }}" {% if form.aturan_pakai.value == key %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <!-- jika pilih bentuk lainnya maka isi di form -->
+                                        <input type="text" class="form-control mt-2 d-none" id="aturan_pakai_lainnya" name="aturan_pakai_lainnya" placeholder="Masukkan aturan pakai obat">
+                                    </div>
+                                </div>
+                                {% if formset.can_delete %}
+                                <div class="text-right mb-3">
+                                    <button type="button" class="btn btn-sm btn-icon-only btn-danger rounded-circle remove-form">
+                                        <span class="btn-inner--icon"><i class="fa-solid fa-xmark"></i></span>
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="text-right mb-3">
+                            <button type="button" class="btn btn-md btn-icon btn-outline-primary" id="add-form">
+                                <span class="btn-inner--icon"><i class="fa-solid fa-plus"></i></span>
+                                <span class="btn-inner--text">Resep Obat</span>
+                            </button>                        
+                        </div>
+
+                        <!-- Medikamentosa (Terapi Obat) & Non-Medikamentosa (Terapi Obat) -->
+                        <div class="row">
+                            <div class="col-12 col-md-6 form-group">
+                                <label for="medikamentosa" class="form-control-label">Medikamentosa (Terapi Obat)</label>
+                                <input type="text" class="form-control" id="medikamentosa" name="medikamentosa" placeholder="Masukkan deskripsi">
+                            </div>
+                            <div class="col-12 col-md-6 form-group">
+                                <label for="non_medikamentosa" class="form-control-label">Non-Medikamentosa (Terapi Obat)</label>
+                                <input type="text" class="form-control" id="non_medikamentosa" name="non_medikamentosa" placeholder="Masukkan deskripsi">
+                            </div>
+                        </div>
+
+                        <!-- Status Pulang -->
+                        <div class="row">
+                            <div class="col-md-12 form-group">
+                                <label for="status_pulang" class="form-control-label">Status Pulang</label>
+                                <select class="form-control" id="status_pulang" name="status_pulang">
+                                    <option value="" disabled selected hidden>Pilih</option>
+                                    {% for key, label in status_pulang_choices %}
+                                        <option value="{{ key }}" {% if form.status_pulang.value == key %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END PLAN -->
+            </form>
+        </div>
+        <!-- Kolom Button -->
+        <div class="col-12 col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Tombol Simpan & Batal -->
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" form="formRM" class="btn btn-primary btn-block">Simpan</button>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <a href="{% url 'daftar_registrasi' %}" class="btn btn-outline-primary btn-block">Batal</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Form Tambah Pasien -->
+    <!-- Footer -->
+    <footer class="footer pt-0">
+        <div class="row align-items-center justify-content-lg-between">
+            <div class="col-lg-6">
+                <div class="copyright text-center text-lg-left text-muted">
+                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">License</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</div>
+<!-- End Page content -->
+{% endblock %}
+
+{% block scripts %}
+<!-- Script toggle form lainnya -->
+<script>
+function toggleInputLainnya(selectId, inputId) {
+    const select = document.getElementById(selectId);
+    const input = document.getElementById(inputId);
+
+    select.addEventListener('change', function() {
+        if (this.value === 'lainnya') {
+            input.classList.remove('d-none');
+        } else {
+            input.classList.add('d-none');
+            input.value = '';  // Kosongkan kalau bukan 'lainnya'
+        }
+    });
+}
+
+// Inisialisasi fungsi untuk masing-masing field
+toggleInputLainnya('bentuk', 'bentuk_lainnya');
+toggleInputLainnya('frekuensi', 'frekuensi_lainnya');
+toggleInputLainnya('dosis_satuan', 'dosis_satuan_lainnya');
+toggleInputLainnya('aturan_pakai', 'aturan_pakai_lainnya');
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("add-form");
+        const resepForm = document.getElementById("resep-obat-form");
+
+        toggleBtn.addEventListener("click", function () {
+            resepForm.classList.toggle("d-none");
+            
+            const textSpan = this.querySelector(".btn-inner--text");
+            const iconSpan = this.querySelector(".btn-inner--icon i");
+        
+            if (!resepForm.classList.contains("d-none")) {
+                textSpan.textContent = "Tutup Resep Obat";
+                iconSpan.className = "fa-solid fa-xmark"; // Ganti ikon
+            } else {
+                textSpan.textContent = "Resep Obat";
+                iconSpan.className = "fa-solid fa-plus";
+            }
+        });
+    });
+</script>
+{% endblock %}

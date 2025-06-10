@@ -1,25 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.contrib.admin import RelatedOnlyFieldListFilter
-from .models import (
-    Pasien, StatusPasienChoices, Registrasi, StatusRegistrasiChoices, RekamMedis,
-    ICD10, Penyakit, Alergi, Obat, Vaksin, Tindakan,
-    RekamMedisObat, RekamMedisTindakan, RekamMedisVaksin,
-)
-
-########## Inline untuk data terkait Rekam Medis ##########
-class RekamMedisObatInline(admin.TabularInline):
-    model = RekamMedisObat
-    extra = 1
-    autocomplete_fields = ['obat']
-
-class RekamMedisVaksinInline(admin.TabularInline):
-    model = RekamMedisVaksin
-    extra = 1
-
-class RekamMedisTindakanInline(admin.TabularInline):
-    model = RekamMedisTindakan
-    extra = 1
+from .models import *
+from django.urls import reverse
 
 ########## Admin untuk Rekam Medis dengan inlines ##########
 @admin.register(RekamMedis)
@@ -29,10 +12,10 @@ class RekamMedisAdmin(admin.ModelAdmin):
         'keluhan_utama', 'kode_diagnosis', 'status_kesadaran', 'created_at',
     )
     list_filter = ['created_at']
-    search_fields = ('registrasi__pasien__nama_lengkap', 'keluhan_utama', 'catatan_diagnosis')
+    search_fields = ('registrasi__pasien__nama_lengkap', 'keluhan_utama', 'diagnosis')
     readonly_fields = ('created_at', 'updated_at')
-    autocomplete_fields = ('registrasi', 'riwayat_penyakit', 'riwayat_alergi', 'kode_diagnosis')
-    inlines = [RekamMedisObatInline, RekamMedisVaksinInline, RekamMedisTindakanInline]
+    autocomplete_fields = ('registrasi', 'kode_diagnosis')
+    allowed_filters = ["registrasi__pasien__id__exact"]
 
     fieldsets = (
         ('📌 Informasi Umum', {
@@ -40,8 +23,8 @@ class RekamMedisAdmin(admin.ModelAdmin):
         }),
         ('🩺 Subjective / Anamnesis', {
             'fields': (
-                'keluhan_utama', 'riwayat_penyakit', 'catatan_riwayat_penyakit',
-                'riwayat_alergi', 'catatan_riwayat_alergi',
+                'keluhan_utama', 'riwayat_penyakit',
+                'riwayat_alergi',
             ),
         }),
         ('📊 Objective', {
@@ -51,7 +34,7 @@ class RekamMedisAdmin(admin.ModelAdmin):
             ),
         }),
         ('📋 Assessment', {
-            'fields': ('kode_diagnosis', 'catatan_diagnosis'),
+            'fields': ('kode_diagnosis', 'diagnosis'),
         }),
         ('🕓 Waktu', {
             'fields': ('created_at', 'updated_at'),
@@ -60,11 +43,11 @@ class RekamMedisAdmin(admin.ModelAdmin):
 
     def get_pasien(self, obj):
         return obj.registrasi.pasien.nama_lengkap
-    get_pasien.short_description = 'Pasien'
+    get_pasien.short_description = 'Pasien' # type: ignore
 
     def get_tanggal_registrasi(self, obj):
         return obj.registrasi.tanggal
-    get_tanggal_registrasi.short_description = 'Tgl Registrasi'
+    get_tanggal_registrasi.short_description = 'Tgl Registrasi' # type: ignore
 
     # Logika untuk update status registrasi
     def save_model(self, request, obj, form, change):
@@ -138,7 +121,7 @@ class RegistrasiAdmin(admin.ModelAdmin):
 class PasienAdmin(admin.ModelAdmin):
     list_display = (
         'no_rm', 'nama_lengkap', 'nik', 'jenis_kelamin',
-        'tanggal_lahir', 'umur', 'status', 'lihat_rekam_medis'
+        'tanggal_lahir', 'umur', 'status'
     )
     list_filter = ('status', 'jenis_kelamin', 'agama', 'pendidikan')
     search_fields = ('nama_lengkap', 'nik', 'no_rm')
@@ -160,13 +143,6 @@ class PasienAdmin(admin.ModelAdmin):
     )
     ordering = ('-created_at',)
 
-    @admin.display(description="Lihat Rekam Medis")
-    def lihat_rekam_medis(self, obj):
-        # ID yang benar harus pakai obj.id, tapi karena link rekam medis via registrasi,
-        # kita sebaiknya arahkan filter by pasien, bukan by registrasi__id
-        url = f"/admin/core/rekammedis/?registrasi__pasien__id__exact={obj.id}"
-        return format_html('<a href="{}">Rekam Medis</a>', url)
-
     @admin.action(description="Nonaktifkan Pasien Terpilih")
     def nonaktifkan_pasien(self, request, queryset):
         updated = queryset.update(status=StatusPasienChoices.NONAKTIF)
@@ -177,34 +153,8 @@ class PasienAdmin(admin.ModelAdmin):
         updated = queryset.update(status=StatusPasienChoices.AKTIF)
         self.message_user(request, f"{updated} pasien berhasil diaktifkan.")
 
-
 ########## Admin untuk Master Data ##########
 @admin.register(ICD10)
 class ICD10Admin(admin.ModelAdmin):
     list_display = ('kode', 'deskripsi')
     search_fields = ['kode', 'deskripsi']  # <-- Wajib untuk autocomplete
-    
-@admin.register(Penyakit)
-class PenyakitAdmin(admin.ModelAdmin):
-    list_display = ('jenis', 'deskripsi')
-    search_fields = ['jenis', 'deskripsi']
-
-@admin.register(Alergi)
-class AlergiAdmin(admin.ModelAdmin):
-    list_display = ('jenis', 'deskripsi')
-    search_fields = ['jenis', 'deskripsi']
-
-@admin.register(Obat)
-class ObatAdmin(admin.ModelAdmin):
-    list_display = ('nama', 'bentuk', 'dosis_nilai', 'dosis_satuan', 'keterangan')
-    search_fields = ['nama']
-
-@admin.register(Vaksin)
-class VaksinAdmin(admin.ModelAdmin):
-    list_display = ('nama',)
-    search_fields = ['nama']
-
-@admin.register(Tindakan)
-class TindakanAdmin(admin.ModelAdmin):
-    list_display = ('nama',)
-    search_fields = ['nama']

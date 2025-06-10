@@ -1,0 +1,203 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ pasien.nama_lengkap }} | Detail{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="header pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Breadcrumb -->
+            <div class="row align-items-center pt-4 pb-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-default d-inline-block mb-0">
+                        {{ page_title|default:"Judul Halaman" }}
+                    </h6>
+                    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home text-default"></i></a>
+                            </li>
+                            {% if breadcrumbs %}
+                                {% for item in breadcrumbs %}
+                                    {% if forloop.last %}
+                                        <li class="breadcrumb-item text-muted active" aria-current="page">{{ item.title }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item">
+                                            <a href="{{ item.url }}" class="text-default">{{ item.title }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Header -->
+<!-- Page Content -->
+<div class="container-fluid mt--6">
+    <!-- Main Row -->
+    <div class="row">
+        <!-- Kolom Utama -->
+        <div class="col-12 col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-muted">DATA PASIEN</h5>
+                </div>
+                <div class="card-body">
+                    <!-- DATA DIRI -->
+                    <h5 class="mb-2 text-muted">DATA DIRI</h5>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="nama_lengkap" class="form-control-label mb-0">Nama Lengkap</label>
+                            <p>{{ pasien.nama_lengkap }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="no_rm" class="form-control-label mb-0">No. Rekam Medis</label>
+                            <p>{{ pasien.no_rm }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="nik" class="form-control-label mb-0">No. Induk Kependudukan</label>
+                            <p>{{ pasien.nik }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="nomor_hp" class="form-control-label mb-0">No. Telepon</label>
+                            <p>{{ pasien.nomor_hp|default:"-" }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="tanggal_lahir" class="form-control-label mb-0">Tanggal Lahir</label>
+                            <p>{{ pasien.tanggal_lahir|date:"j F Y" }} <span class="text-muted">({{ pasien.umur_tahun }})</span></p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="jenis_kelamin" class="form-control-label mb-0">Jenis Kelamin</label>
+                            <p>{{ pasien.get_jenis_kelamin_display|default:"-" }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="alamat" class="form-control-label mb-0">Alamat</label>
+                            <p>{{ pasien.alamat|default:"-" }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                        </div>
+                    </div>
+                    <!-- DATA SOSIAL -->
+                    <hr>
+                    <h5 class="mb-2 text-muted">SOSIAL</h5>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="agama" class="form-control-label mb-0">Agama</label>
+                            <p>{{ pasien.get_agama_display|default:"-" }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="pendidikan" class="form-control-label mb-0">Pendidikan Terakhir</label>
+                            <p>{{ pasien.get_pendidikan_display|default:"-" }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="pekerjaan" class="form-control-label mb-0">Pekerjaan</label>
+                            <p>{{ pasien.get_pekerjaan_display|default:"-" }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="status_pernikahan" class="form-control-label mb-0">Status Pernikahan</label>
+                            <p>{{ pasien.get_status_pernikahan_display|default:"-" }}</p>
+                        </div>
+                    </div>
+                    <!-- DATA KESEHATAN -->
+                    <hr>
+                    <h5 class="mb-2 text-muted">KESEHATAN</h5>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="status_merokok" class="form-control-label mb-0">Status Merokok</label>
+                            <p>{{ pasien.get_status_merokok_display|default:"-" }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="golongan_darah" class="form-control-label mb-0">Golongan Darah</label>
+                            <p>{{ pasien.get_golongan_darah_display|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Kolom Button -->
+        <div class="col-12 col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-12">
+                            <a href="{% url 'edit_pasien' pasien.id %}" class="btn btn-primary btn-block">Edit Pasien</a>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <a href="{% url 'riwayat_rekam_medis' pasien.id %}" class="btn btn-outline-primary btn-block">Riwayat Rekam Medis</a>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <a href="#" class="btn btn-outline-primary btn-block">Unduh Kartu Pasien</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <a href="{% url 'tambah_registrasi' pasien.id %}" class="btn btn-outline-primary btn-block">Buat Registrasi</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="col-12">
+                        <label for="jenis_kelamin" class="form-control-label mb-0">Status Pasien</label>
+                        <br>
+                        {% if pasien.status == 'aktif' %}
+                        <p class="m-0 badge badge-success">Aktif</p>
+                        {% elif pasien.status == 'nonaktif' %}
+                        <p class="m-0 badge badge-danger">Tidak Aktif</p>
+                        {% else %}
+                        <p class="m-0 badge badge-light">{{ pasien.get_status_display }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Main Row -->
+    <!-- Footer -->
+    <footer class="footer pt-0">
+        <div class="row align-items-center justify-content-lg-between">
+            <div class="col-lg-6">
+                <div class="copyright text-center text-lg-left text-muted">
+                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">License</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <!-- End Footer -->
+</div>
+<!-- End Page content -->
+{% endblock %}

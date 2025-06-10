@@ -1,0 +1,187 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Registrasi{% endblock %}
+
+{% block content %}
+<!-- Page content -->
+ <!-- Header -->
+<div class="header pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Breadcrumb -->
+            <div class="row align-items-center pt-4 pb-4">
+                <!-- Kolom Kiri -->
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-default d-inline-block mb-0">
+                        {{ page_title|default:"Judul Halaman" }}
+                    </h6>
+                    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home text-default"></i></a>
+                            </li>
+                            {% if breadcrumbs %}
+                                {% for item in breadcrumbs %}
+                                    {% if forloop.last %}
+                                        <li class="breadcrumb-item text-default active" aria-current="page">{{ item.title }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item">
+                                            <a href="{{ item.url }}" class="text-default">{{ item.title }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+                </div>
+                <!-- Kolom Kanan -->
+                <div class="col-lg-6 col-5 d-flex justify-content-end align-items-center">
+                    <form method="get" class="d-flex justify-content-end align-items-center m-0 w-100">
+                        {% if status_filter %}
+                            <input type="hidden" name="status" value="{{ status_filter }}">
+                        {% endif %}
+                        <div class="form-group mb-0">
+                            <div class="input-group input-group-merge w-auto">
+                                <input type="text" name="tanggal" class="form-control datepicker" placeholder="Pilih tanggal"
+                                       value="{{ tanggal_filter }}" autocomplete="off" id="datepickerInput">
+                                <div class="input-group-append">
+                                    <span class="input-group-text text-primary">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <noscript><button type="submit" class="btn btn-primary btn-sm ml-2">Terapkan</button></noscript>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Header -->
+<div class="container-fluid mt--6">
+    <!-- Row 1 - Antrian Registrasi -->
+    <div class="row">
+        <div class="col">
+            <!-- Filter Status -->
+            <ul class="nav nav-tabs border-1 mb-3" id="statusTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link {% if not status_filter %}active{% endif %}" href="?{% if tanggal_filter %}&tanggal={{ tanggal_filter }}{% endif %}">Semua</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'menunggu' %}active{% endif %}" href="?status=menunggu{% if tanggal_filter %}&tanggal={{ tanggal_filter }}{% endif %}">Menunggu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'selesai' %}active{% endif %}" href="?status=selesai{% if tanggal_filter %}&tanggal={{ tanggal_filter }}{% endif %}">Selesai</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'batal' %}active{% endif %}" href="?status=batal{% if tanggal_filter %}&tanggal={{ tanggal_filter }}{% endif %}">Batal</a>
+                </li>
+            </ul>
+            <!-- End Filter -->
+            <div class="card">
+                <!-- DataTable List Antrian Registrasi -->
+                <div class="table-responsive py-3">
+                    <!-- <table class="table table-flush" id="datatable-basic"> -->
+                    <table id="datatable-basic" class="table table-flush table-striped">                         
+                        <thead class="thead-light">
+                            <tr>
+                                <th>No. Antri</th>
+                                <th>Nama Pasien</th>
+                                <th>Waktu Konsul</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in registrasi_list %}
+                            <tr>
+                                <td class="align-middle">{{ item.no_antrian }}</td>
+                                <td class="align-middle">{{ item.pasien.nama_lengkap }}</td>
+                                <td class="align-middle">
+                                    {{ item.tanggal|date:"d M Y" }}<br>
+                                    <small class="text-muted">{{ item.waktu|time:"H:i" }}</small>
+                                </td>
+                                <td class="align-middle">
+                                    {% if item.status == 'menunggu' %}
+                                        <span class="badge badge-warning">Menunggu</span>
+                                    {% elif item.status == 'selesai' %}
+                                        <span class="badge badge-success">Selesai</span>
+                                    {% elif item.status == 'batal' %}
+                                        <span class="badge badge-danger">Batal</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-primary btn-sm" data-toggle="dropdown" title="More" ><i class="fa-solid fa-ellipsis"></i></a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'tambah_rekam_medis' item.id %}">
+                                            <i class="fa-solid fa-circle-plus text-primary"></i> 
+                                            <span>Buat Rekam Medis</span>
+                                        </a>
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'selesaikan_registrasi' item.id %}">
+                                            <i class="fa-solid fa-circle-check text-primary"></i> 
+                                            <span>Selesaikan</span>
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'batalkan_registrasi' item.id %}">
+                                            <i class="fa-solid fa-ban text-danger"></i> 
+                                            <span>Batalkan</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- End DataTable List Antrian Registrasi -->
+            </div>
+        </div>
+    </div>
+    <!-- End Row 1 -->
+    <!-- Footer -->
+    <footer class="footer pt-0">
+        <div class="row align-items-center justify-content-lg-between">
+            <div class="col-lg-6">
+                <div class="copyright text-center text-lg-left text-muted">
+                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">License</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <!-- End Footer -->
+</div>
+<!-- End Page content -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function () {
+    console.log("Applying bootstrap-datepicker...");
+    $('.datepicker').datepicker({
+        format: 'mm-dd-yyyy',
+        autoclose: true,
+        todayHighlight: true,
+        orientation: 'bottom auto'
+    }).on('changeDate', function () {
+        $(this).closest('form').submit();  // submit otomatis
+    });
+});
+</script>
+{% endblock %}

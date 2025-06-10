@@ -1,0 +1,361 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Tambahkan Pasien{% endblock %}
+
+{% block content %}
+ <!-- Header -->
+<div class="header pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Breadcrumb -->
+            <div class="row align-items-center pt-4 pb-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-default d-inline-block mb-0">
+                        {{ page_title|default:"Judul Halaman" }}
+                    </h6>
+                    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard' %}"><i class="fas fa-home text-default"></i></a>
+                            </li>
+                            {% if breadcrumbs %}
+                                {% for item in breadcrumbs %}
+                                    {% if forloop.last %}
+                                        <li class="breadcrumb-item text-muted active" aria-current="page">{{ item.title }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item">
+                                            <a href="{{ item.url }}" class="text-default">{{ item.title }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Header -->
+<!-- Page content -->
+<div class="container-fluid mt--6">
+    <!-- Form Tambah Pasien -->
+    <div class="row">
+        <!-- Kolom Utama -->
+        <div class="col-12 col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <form id="formPasien" method="POST" action="">
+                        {% csrf_token %}
+                        <div class="d-flex align-items-center text-center mt-3 mb-3">
+                            <h5 class="mr-3 my-0 font-weight-bold">DATA DIRI</h5>
+                            <div class="flex-grow-1 border-top"></div>
+                        </div>
+                        <!-- Jenis Pasien & No. Asuransi-->
+                        <div class="row">
+                            <!-- Jenis Pasien -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-control-label">Jenis Pasien <span class="text-danger">*</span></label>
+                                <div class="row mt-3 mx-1">
+                                    <div class="col-auto custom-control custom-radio align-items-center">
+                                        <input type="radio" name="jenis_pasien" id="umum" value="umum" class="custom-control-input" checked onchange="toggleAsuransiInput()">
+                                        <label class="custom-control-label" for="umum">Umum</label>
+                                    </div>
+                                    <div class="col-auto custom-control custom-radio align-items-center">
+                                        <input type="radio" name="jenis_pasien" id="bpjs" value="bpjs" class="custom-control-input" onchange="toggleAsuransiInput()">
+                                        <label class="custom-control-label" for="bpjs">BPJS</label>
+                                    </div>
+                                    <div class="col-auto custom-control custom-radio align-items-center">
+                                        <input type="radio" name="jenis_pasien" id="asuransi_lain" value="asuransi_lain" class="custom-control-input" onchange="toggleAsuransiInput()">
+                                        <label class="custom-control-label" for="asuransi_lain">Asuransi Lain</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- No. Asuransi -->
+                            <div class="col-12 col-md-8">
+                                <div class="form-group">
+                                    <label for="no_asuransi" class="form-control-label">No. Asuransi <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="no_asuransi" name="no_asuransi" pattern="\d{30}" placeholder="Nomor Asuranasi" maxlength="30" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Nama Lengkap -->
+                        <div class="row">
+                            <!-- Nama Lengkap -->
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="nama_lengkap" class="form-control-label">Nama Lengkap <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" placeholder="Nama Lengkap" required>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- No. RM & NIK-->
+                        <div class="row">
+                            <!-- No. RM -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="no_rm" class="form-control-label">No. Rekam Medis <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="no_rm" name="no_rm" placeholder="Nomor Rekam Medis" required>
+                                </div>
+                            </div>
+                            <!-- NIK -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="nik" class="form-control-label">NIK <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="nik" name="nik" maxlength="16" pattern="\d{16}" placeholder="Nomor Induk Kependudukan" maxlength="16" required>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tanggal Lahir & Jenis Kelamin-->
+                        <div class="row">
+                            <!-- Tanggal Lahir -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="tanggal_lahir" class="form-control-label">Tanggal Lahir <span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="text" class="form-control datepicker" id="tanggal_lahir" name="tanggal_lahir" placeholder="Tanggal Lahir (MM/DD/YYYY)" required autocomplete="off">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text text-primary">
+                                                <i class="fa-solid fa-calendar-days"></i>
+                                            </span>
+                                        </div> 
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Jenis Kelamin -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="jenis_kelamin" class="form-control-label">Jenis Kelamin <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="jenis_kelamin" name="jenis_kelamin" required>
+                                        <option value="" disabled selected hidden>Pilih</option>
+                                        <option value="l">Laki-laki</option>
+                                        <option value="p">Perempuan</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Status Pasien & Nomor HP -->
+                        <div class="row">
+                            <!-- Status Pasien -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="status" class="form-control-label">Status <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="status" name="status" required>
+                                        <option value="aktif">Aktif</option>
+                                        <option value="nonaktif">Tidak Aktif</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Nomor HP -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="nomor_hp" class="form-control-label">Nomor telepon <span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="tel" class="form-control" pattern="08[0-9]{8,11}" id="nomor_hp" name="nomor_hp" placeholder="Nomor Telepon">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text text-default">
+                                                <i class="fa-solid fa-phone-flip text-muted"></i>
+                                            </span>
+                                        </div> 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Alamat -->
+                        <div class="row">
+                            <!-- Alamat -->
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="alamat" class="form-control-label">Alamat Lengkap <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="alamat" name="alamat" rows="2" placeholder="Alamat"></textarea>
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="d-flex align-items-center text-center mt-4 mb-3">
+                            <h5 class="mr-3 my-0 font-weight-bold">SOSIAL</h5>
+                            <div class="flex-grow-1 border-top"></div>
+                        </div>
+                        <!-- Agama % Pendidikan-->
+                        <div class="row">
+                            <!-- Agama -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="agama" class="form-control-label">Agama</label>
+                                    <select class="form-control" id="agama" name="agama">
+                                        <option value="" disabled selected hidden>Pilih</option>
+                                        <option value="islam">Islam</option>
+                                        <option value="kristen_protestan">Kristen Protestan</option>
+                                        <option value="katolik">Katolik</option>
+                                        <option value="hindu">Hindu</option>
+                                        <option value="buddha">Buddha</option>
+                                        <option value="konghucu">Konghucu</option>
+                                        <option value="kepercayaan_lain">Kepercayaan Lain</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Pendidikan --> 
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="pendidikan" class="form-control-label">Pendidikan</label>
+                                    <select class="form-control" id="pendidikan" name="pendidikan">
+                                        <option value="" disabled selected hidden>Pilih</option>
+                                        <option value="belum_sekolah">Belum Sekolah</option>
+                                        <option value="sd">SD/Sederajat</option>
+                                        <option value="smp">SMP/Sederajat</option>
+                                        <option value="sma">SMA/Sederajat</option>
+                                        <option value="d3">Diploma 3 (D3)</option>
+                                        <option value="s1">Sarjana (S1)</option>
+                                        <option value="s2">Magister (S2)</option>
+                                        <option value="s3">Doktor (S3)</option>
+                                        <option value="lainnya">Lainnya</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Pekerjaan & Status Pernikahan -->
+                        <div class="row">
+                            <!-- Pekerjaan -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="pekerjaan" class="form-control-label">Pekerjaan</label>
+                                    <select class="form-control" id="pekerjaan" name="pekerjaan">
+                                         <option value="" disabled selected hidden>Pilih</option>
+                                         <option value="belum_kerja">Belum Bekerja</option>
+                                         <option value="pelajar_mahasiswa">Pelajar/Mahasiswa</option>
+                                         <option value="ibu_rumah_tangga">Mengurus Rumah Tangga</option>
+                                         <option value="guru">Guru</option>
+                                         <option value="pensiunan">Pensiunan</option>
+                                         <option value="pns">PNS</option>
+                                         <option value="tni_polri">TNI/Polri</option>
+                                         <option value="karyawan_swasta">Karyawan Swasta</option>
+                                         <option value="karyawan_bumn">Karyawan BUMN/BUMD</option>
+                                         <option value="pengusaha">Pengusaha</option>
+                                         <option value="lainnya">Lainnya</option>
+                                     </select>
+                                </div>
+                            </div>
+                            <!-- Status Pernikahan -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="status_pernikahan" class="form-control-label">Status Pernikahan</label>
+                                    <select class="form-control" id="status_pernikahan" name="status_pernikahan">
+                                        <option value="" disabled selected hidden>Pilih</option>
+                                        <option value="belum_nikah">Belum Nikah</option>
+                                        <option value="nikah">Nikah</option>
+                                        <option value="cerai_hidup">Cerai Hidup</option>
+                                        <option value="cerai_mati">Cerai Mati</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center text-center mt-4 mb-3">
+                            <h5 class="mr-3 my-0 text-default font-weight-bold">DATA KESEHATAN</h5>
+                            <div class="flex-grow-1 border-top"></div>
+                        </div>
+                        <!-- Status Merokok & Golongan Darah-->
+                        <div class="row">
+                            <!-- Status Merokok -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="status_merokok" class="form-control-label">Status Merokok</label>
+                                    <select class="form-control" id="status_merokok" name="status_merokok">
+                                        <option value="" disabled selected hidden>Pilih</option>
+                                        <option value="tidak_merokok">Tidak Merokok</option>
+                                        <option value="merokok">Perokok</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Golongan Darah -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="golongan_darah" class="form-control-label">Golongan Darah</label>
+                                    <select class="form-control" id="golongan_darah" name="golongan_darah">
+                                        <option value="" disabled selected hidden>Pilih</option>
+                                        <option value="a">A</option>
+                                        <option value="b">B</option>
+                                        <option value="ab">AB</option>
+                                        <option value="o">O</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>         
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Kolom Button -->
+        <div class="col-12 col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Tombol Simpan & Batal -->
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" form="formPasien" class="btn btn-primary btn-block">Simpan</button>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <a href="{% url 'daftar_pasien' %}" class="btn btn-outline-primary btn-block">Batal</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Form Tambah Pasien -->
+    <!-- Footer -->
+    <footer class="footer pt-0">
+        <div class="row align-items-center justify-content-lg-between">
+            <div class="col-lg-6">
+                <div class="copyright text-center text-lg-left text-muted">
+                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">License</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <!-- End Footer -->
+</div>
+<!-- End Page content -->
+{% endblock %}
+
+{% block scripts %}
+    <!-- Datepicker halaman tambah pasien -->
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                format: 'mm-dd-yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+        });
+    </script>
+    <!-- Script toggle input halmaan tambah pasien-->
+    <script>
+        function toggleAsuransiInput() {
+            const inputAsuransi = document.getElementById('no_asuransi');
+            const jenisPasien = document.querySelector('input[name="jenis_pasien"]:checked').value;
+    
+            // Aktifkan input jika BPJS atau Lain
+            inputAsuransi.disabled = !(jenisPasien === 'bpjs' || jenisPasien === 'asuransi_lain');
+        }
+    
+        // Inisialisasi saat halaman dimuat (jika form digunakan kembali)
+        document.addEventListener('DOMContentLoaded', toggleAsuransiInput);
+    </script>
+{% endblock %}

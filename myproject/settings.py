@@ -149,5 +149,8 @@ LOGOUT_REDIRECT_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+DATE_INPUT_FORMATS = ['%m/%d/%Y']
+
 from django.conf.locale.id import formats as id_formats
-id_formats.DATE_FORMAT = "j F Y"
+id_formats.DATE_FORMAT = "m/d/Y"
+id_formats.DATE_INPUT_FORMATS = ['%m/%d/%Y']
