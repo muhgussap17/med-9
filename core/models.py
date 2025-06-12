@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from datetime import date
+from myproject.middleware.current_user import get_current_user
+
+User = get_user_model()
 
 ########## Model TextChoice ##########
 # === Untuk Identitas Pasien ===
@@ -12,7 +16,6 @@ class JenisPasienChoices(models.TextChoices):
 class JenisKelaminChoices(models.TextChoices):
     LAKI_LAKI = 'l', 'Laki-laki'
     PEREMPUAN = 'p', 'Perempuan'
-    TIDAK_DIISI = '', '-'
 
 class AgamaChoices(models.TextChoices):
     ISLAM = 'islam', 'Islam'
@@ -22,7 +25,6 @@ class AgamaChoices(models.TextChoices):
     BUDDHA = 'buddha', 'Buddha'
     KONGHUCU = 'konghucu', 'Konghucu'
     KEPERCAYAAN_LAIN = 'kepercayaan_lain', 'Kepercayaan Lain'
-    TIDAK_DIISI = '', '-'
 
 class PendidikanChoices(models.TextChoices):
     BELUM_SEKOLAH = 'belum_sekolah', 'Belum Sekolah'
@@ -34,7 +36,6 @@ class PendidikanChoices(models.TextChoices):
     S2 = 's2', 'Magister (S2)'
     S3 = 's3', 'Doktor (S3)'
     LAINNYA = 'lainnya', 'Lainnya'
-    TIDAK_DIISI = '', '-'
 
 class PekerjaanChoices(models.TextChoices):
     BELUM_KERJA = 'belum_kerja', 'Belum Bekerja'
@@ -48,26 +49,22 @@ class PekerjaanChoices(models.TextChoices):
     KARYAWAN_BUMN = 'karyawan_bumn', 'Karyawan BUMN/BUMD'
     PENGUSAHA = 'pengusaha', 'Pengusaha'
     LAINNYA = 'lainnya', 'Lainnya'
-    TIDAK_DIISI = '', '-'
 
 class StatusPernikahanChoices(models.TextChoices):
     BELUM_NIKAH = 'belum_nikah', 'Belum Nikah'
     NIKAH = 'nikah', 'Nikah'
     CERAI_HIDUP = 'cerai_hidup', 'Cerai Hidup'
     CERAI_MATI = 'cerai_mati', 'Cerai Mati'
-    TIDAK_DIISI = '', '-'
 
 class GolonganDarahChoices(models.TextChoices):
     O = 'o', 'O'
     A = 'a', 'A'
     B = 'b', 'B'
     AB = 'ab', 'AB'
-    TIDAK_DIISI = '', '-'
 
 class StatusPerokokChoices(models.TextChoices):
     MEROKOK = 'merokok', 'Merokok'
     TIDAK_MEROKOK = 'tidak_merokok', 'Tidak Merokok'
-    TIDAK_DIISI = '', '-'
 
 class StatusPasienChoices(models.TextChoices):
     AKTIF = 'aktif', 'Aktif'
@@ -99,47 +96,6 @@ class StatusPulangChoices(models.TextChoices):
     SEHAT = 'sehat', 'Sehat',
     RUJUK = 'rujuk', 'Rujuk',
 
-# === Untuk Resep Obat ===
-class JenisObatChoices(models.TextChoices):
-    TABLET = 'tablet', 'Tablet'
-    KAPSUL = 'kapsul', 'Kapsul'
-    SIRUP = 'sirup', 'Sirup'
-    SALEP = 'salep', 'Salep'
-    INJEKSI = 'injeksi', 'Injeksi'
-    TETES = 'tetes', 'Tetes'
-    SUPPOSITORIA = 'suppositoria', 'Suppositoria'
-    LAINNYA = 'lainnya', 'Lainnya'
-
-class FrekuensiMinumChoices(models.TextChoices):
-    SEKALI_SEHARI = '1x1', '1x1'
-    DUA_KALI_SEHARI = '2x1', '2x1'
-    TIGA_KALI_SEHARI = '3x1', '3x1'
-    EMPAT_KALI_SEHARI = '4x1', '4x1'
-    SESUAI_KEBUTUHAN = 'prn', 'Sesuai kebutuhan (PRN)'
-    LAINNYA = 'lainnya', 'Lainnya'
-
-class SatuanDosisChoices(models.TextChoices):
-    MG = 'mg', 'Miligram (mg)'
-    G = 'g', 'Gram (g)'
-    ML = 'ml', 'Mililiter (ml)'
-    CC = 'cc', 'cc'
-    IU = 'IU', 'International Unit (IU)'
-    TABLET = 'tablet', 'Tablet'
-    KAPSUL = 'kapsul', 'Kapsul'
-    AMPUL = 'ampul', 'Ampul'
-    TETES = 'tetes', 'Tetes'
-    SENDOK_MAKAN = 'sdm', 'Sendok Makan'
-    SENDOK_TEH = 'sdt', 'Sendok Teh'
-    LAINNYA = 'lainnya', 'Lainnya'
-
-class AturanPakaiChoices(models.TextChoices):
-    SEBELUM_MAKAN = 'sebelum_makan', 'Sebelum makan'
-    SESUDAH_MAKAN = 'sesudah_makan', 'Sesudah makan'
-    SEBELUM_TIDUR = 'sebelum_tidur', 'Sebelum tidur'
-    SETELAH_BANGUN = 'setelah_bangun', 'Setelah bangun tidur'
-    DENGAN_MAKANAN = 'dengan_makanan', 'Bersama makanan'
-    LAINNYA = 'lainnya', 'Lainnya'
-
 ########## Model Master Data ##########
 class ICD10(models.Model): # Kode Diagnosa
     kode = models.CharField(max_length=10, unique=True)
@@ -155,31 +111,43 @@ class ICD10(models.Model): # Kode Diagnosa
 
 ########## Model Utama ##########
 # === PASIEN ===
+def generate_no_rm():
+    last_rm = Pasien.objects.order_by('-no_rm').first()
+    if last_rm and last_rm.no_rm:
+        last_number = int(last_rm.no_rm.replace('RM', ''))
+        return f'RM{last_number + 1:06d}'
+    return 'RM000001'
+
 class Pasien(models.Model): # Diisi oleh Admisi/Resepsionis, Digunakan hanya untuk menambahkan pasien baru dan membuat registrasi pemeriksaan.
     # --- Data Jenis Pasien ---
     jenis_pasien = models.CharField(max_length=30, choices=JenisPasienChoices.choices, default=JenisPasienChoices.UMUM, blank=True, null=True) # Tidak Wajib diisi
     no_asuransi = models.CharField(max_length=30, unique=True, blank=True, null=True) # Tidak Wajib diisi dan unik jika Umum
     # --- Data Identitas Wajib (Sesuai PMK) ---
-    no_rm = models.CharField(max_length=20, unique=True) # Wajib diisi* dan unik (Manual/Auto Generate nanti ditentukan)
-    nama_lengkap = models.CharField(max_length=100) # Wajib diisi*
-    nik = models.CharField(max_length=16, unique=True) # Wajib diisi* dan unik
+    no_rm = models.CharField(max_length=20, unique=True, blank=True, null=True) # Wajib diisi* dan unik (Manual/Auto Generate nanti ditentukan)
+    nama_lengkap = models.CharField(max_length=100, blank=True, null=True) # Wajib diisi*
+    nik = models.CharField(max_length=16, unique=True, blank=True, null=True) # Wajib diisi* dan unik
     # --- Data Sosial Wajib tapi Opsional (Sesuai PMK) ---
     agama = models.CharField(max_length=30, choices=AgamaChoices.choices, blank=True, null=True) # Tidak Wajib diisi
     pendidikan = models.CharField(max_length=30, choices=PendidikanChoices.choices, blank=True, null=True) # Tidak Wajib diisi
     pekerjaan = models.CharField(max_length=30, choices=PekerjaanChoices.choices, blank=True, null=True) # Tidak Wajib diisi
     status_pernikahan = models.CharField(max_length=30, choices=StatusPernikahanChoices.choices, blank=True, null=True) # Tidak Wajib diisi
     # --- Tambahan Data Identitas --- 
-    status = models.CharField(max_length=10, choices=StatusPasienChoices.choices, default=StatusPasienChoices.AKTIF) # Wajib diisi*
-    tanggal_lahir = models.DateField() # Wajib diisi* (Untuk Generate Umur juga)
-    jenis_kelamin = models.CharField(max_length=10, choices=JenisKelaminChoices.choices) # Wajib diisi*
+    status = models.CharField(max_length=10, choices=StatusPasienChoices.choices, default=StatusPasienChoices.AKTIF, blank=True, null=True) # Wajib diisi*
+    tanggal_lahir = models.DateField(blank=True, null=True) # Wajib diisi* (Untuk Generate Umur juga)
+    jenis_kelamin = models.CharField(max_length=10, choices=JenisKelaminChoices.choices, blank=True, null=True) # Wajib diisi*
     nomor_hp = models.CharField(max_length=14, blank=True, null=True) # Tidak Wajib diisi
     alamat = models.CharField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
-    # --- Tambahan Data Kesehatan --- 
+    # --- Tambahan Data Keseha  
     status_merokok = models.CharField(max_length=20 , choices=StatusPerokokChoices.choices, blank=True, null=True) # Tidak Wajib diisi
     golongan_darah = models.CharField(max_length=10, choices=GolonganDarahChoices.choices, blank=True, null=True) # Tidak Wajib diisi
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.no_rm:
+            self.no_rm = generate_no_rm()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nama_lengkap}"
@@ -189,9 +157,9 @@ class Pasien(models.Model): # Diisi oleh Admisi/Resepsionis, Digunakan hanya unt
         today = date.today()
         born = self.tanggal_lahir
 
-        tahun = today.year - born.year
-        bulan = today.month - born.month
-        hari = today.day - born.day
+        tahun = today.year - born.year # type: ignore
+        bulan = today.month - born.month # type: ignore
+        hari = today.day - born.day # type: ignore
 
         if hari < 0:
             bulan -= 1
@@ -207,10 +175,10 @@ class Pasien(models.Model): # Diisi oleh Admisi/Resepsionis, Digunakan hanya unt
     def umur_tahun(self):
         today = date.today()
         born = self.tanggal_lahir
-        tahun = today.year - born.year
+        tahun = today.year - born.year # type: ignore
 
         # Koreksi umur jika ulang tahun belum lewat tahun ini
-        if (today.month, today.day) < (born.month, born.day):
+        if (today.month, today.day) < (born.month, born.day): # type: ignore
             tahun -= 1
 
         return f"{tahun} tahun"
@@ -249,58 +217,49 @@ class RekamMedis(models.Model):
     registrasi = models.ForeignKey(Registrasi, on_delete=models.CASCADE, related_name='rekam_medis')
 
     # --- Subjective / Anamnesis ---
-    keluhan_utama = models.CharField(max_length=255)  # Wajib diisi
-    riwayat_penyakit = models.CharField(max_length=255, blank=True) # Tidak Wajib diisi
-    riwayat_alergi = models.CharField(max_length=255, blank=True) # Tidak Wajib diisi
+    keluhan_utama = models.CharField(max_length=255, blank=True, null=True)  # Wajib diisi
+    riwayat_penyakit = models.CharField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
+    riwayat_alergi = models.CharField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
     
     # --- Objective ---
     # -- Status Kesadaran -- 
-    status_kesadaran = models.CharField(max_length=20, choices=StatusKesadaranChoices.choices, default=StatusKesadaranChoices.COMPOS_MENTIS) # Wajib diisi
+    status_kesadaran = models.CharField(max_length=20, choices=StatusKesadaranChoices.choices, default=StatusKesadaranChoices.COMPOS_MENTIS, blank=True, null=True) # Wajib diisi
     # -- Tanda-tanda Vital -- (dalam view ditambahkan tanda-tanda vital pada kunjungan sebelumnya)
-    suhu_tubuh = models.FloatField(blank=True, null=True)           # Format: °C
+    suhu_tubuh = models.PositiveIntegerField(blank=True, null=True)           # Format: °C
     sistole = models.PositiveIntegerField(blank=True, null=True)              # Format: mmHg
     diastole = models.PositiveIntegerField(blank=True, null=True)             # Format: mmHg
     nadi = models.PositiveIntegerField(blank=True, null=True)                 # Format: x/menit
     frekuensi_pernafasan = models.PositiveIntegerField(blank=True, null=True) # Format: x/menit
     tinggi_badan = models.PositiveIntegerField(blank=True, null=True)         # Format: cm
-    berat_badan = models.Field(blank=True, null=True)          # Format: kg
+    berat_badan = models.PositiveIntegerField(blank=True, null=True)          # Format: kg
 
     # --- Assesment ---
-    kode_diagnosis = models.ForeignKey(ICD10, on_delete=models.CASCADE) # Wajib diisi
-    diagnosis = models.CharField(max_length=255) # Wajib diisi
-    prognosis = models.CharField(max_length=10, choices=PrognosisChoices.choices) # Wajib diisi
+    kode_diagnosis = models.ForeignKey(ICD10, on_delete=models.CASCADE, blank=True, null=True) # Wajib diisi
+    diagnosis = models.CharField(max_length=255, blank=True, null=True) # Wajib diisi
+    prognosis = models.CharField(max_length=10, choices=PrognosisChoices.choices, blank=True, null=True) # Wajib diisi
 
     # --- Plan --- (Jika dibutuhkan aja)
-    medikamentosa = models.CharField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
-    non_medikamentosa = models.CharField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
+    medikamentosa = models.TextField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
+    non_medikamentosa = models.TextField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
     status_pulang = models.CharField(max_length=20, choices=StatusPulangChoices.choices, blank=True, null=True) # Tidak Wajib diisi
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rekam_dibuat')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rekam_diubah')
+
+    def save(self, *args, **kwargs):
+        user = get_current_user()
+        if user and not self.pk:  # baru dibuat
+            self.created_by = user
+        if user:
+            self.updated_by = user
+        super().save(*args, **kwargs)
+        
     def __str__(self):
         return f"{self.registrasi.pasien.nama_lengkap} - {self.created_at.date()}"
 
     class Meta:
         verbose_name_plural = 'Rekam Medis'
         ordering = ['-created_at']
-
-# === RESEP OBAT ===
-class ResepObat(models.Model):
-    rekam_medis = models.ForeignKey(RekamMedis, on_delete=models.CASCADE, related_name='resep_obat')
-    nama_obat = models.CharField(max_length=255, blank=True, null=True)
-    jumlah = models.CharField(max_length=5, blank=True, null=True)
-    bentuk = models.CharField(max_length=50, choices=JenisObatChoices.choices, blank=True, null=True)
-    bentuk_lainnya = models.CharField(max_length=50, blank=True, null=True)
-    dosis_nilai = models.PositiveIntegerField(help_text="Contoh: 500, 5, dll", blank=True, null=True)
-    # --- Aturan Pakai --- 
-    frekuensi = models.CharField(max_length=20, choices=FrekuensiMinumChoices.choices, blank=True, null=True)
-    frekuensi_lainnya = models.CharField(max_length=255, blank=True, null=True)
-    dosis_satuan = models.CharField(max_length=20, choices=SatuanDosisChoices.choices, blank=True, null=True)
-    dosis_satuan_lainnya = models.CharField(max_length=255, blank=True, null=True)
-    aturan_pakai = models.CharField(max_length=50, choices=AturanPakaiChoices.choices, blank=True, null=True)
-    aturan_pakai_lainnya = models.CharField(max_length=255, blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.nama_obat} ({self.dosis_nilai}{self.dosis_satuan}) - {self.rekam_medis}"
-

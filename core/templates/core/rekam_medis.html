@@ -10,6 +10,7 @@
         <div class="header-body">
             <!-- Breadcrumb -->
             <div class="row align-items-center pt-4 pb-4">
+                <!-- Kolom Kiri -->
                 <div class="col-lg-6 col-7">
                     <h6 class="h2 text-default d-inline-block mb-0">
                         {{ page_title|default:"Judul Halaman" }}
@@ -35,11 +36,32 @@
                         </ol>
                     </nav>
                 </div>
+                <!-- Kolom Kanan -->
+                <div class="col-lg-6 col-5 d-flex justify-content-end align-items-center">
+                    <form method="get" class="d-flex justify-content-end align-items-center m-0 w-100">
+                        {% if status_filter %}
+                            <input type="hidden" name="status" value="{{ status_filter }}">
+                        {% endif %}
+                        <div class="form-group mb-0">
+                            <div class="input-group input-group-merge w-auto">
+                                <input type="text" name="tanggal" class="form-control datepicker" placeholder="Pilih tanggal"
+                                       value="{{ tanggal_filter }}" autocomplete="off" id="datepickerInput">
+                                <div class="input-group-append">
+                                    <span class="input-group-text text-primary">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <noscript><button type="submit" class="btn btn-primary btn-sm ml-2">Terapkan</button></noscript>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 <!-- End Header -->
+ 
 <!-- Page content -->
 <div class="container-fluid mt--6">
     <!-- DataTable Daftar Rekam Medis Semua Pasien -->
@@ -53,36 +75,46 @@
                     <table id="datatable-basic" class="table table-flush table-striped">                         
                         <thead class="thead-light">
                             <tr>
-                                <th>Tanggal</th>
+                                <th class="w-15">Tanggal</th>
                                 <th>Nama Pasien</th>
                                 <th>Perubahan Terakhir</th>
-                                <th>Aksi</th>
+                                <th class="w-10 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in rekam_list %}
                             <tr>
-                                <td>{{ item.created_at|date:"d M Y" }}<br>
+                                <td class="align-middle">{{ item.created_at|date:"d M Y" }}<br>
                                     <small class="text-muted">{{ item.created_at|time:"H:i"}}</small>
                                 </td>
-                                <td>{{ item.pasien.nama_lengkap }}</td>
-                                <td>Dibuat/Diubah oleh User ... <br>
-                                    <small class="text-muted">{{ item.updated_at|date:"d M Y" }} {{ item.updated_at|time:"H:i" }}</small>
+                                <td class="align-middle">{{ item.registrasi.pasien.nama_lengkap }}</td>
+                                <td class="align-middle"><br>
+                                    {% if item.created_at == item.updated_at %}
+                                        Dibuat oleh <strong>{{ item.created_by|default:"-" }}</strong><br>
+                                        <small class="text-muted">
+                                            {{ item.created_at|date:"d M Y" }} {{ item.created_at|time:"H:i" }}
+                                        </small>
+                                    {% else %}
+                                        Diubah oleh <strong>{{ item.updated_by|default:"-" }}</strong><br>
+                                        <small class="text-muted">
+                                            {{ item.updated_at|date:"d M Y" }} {{ item.updated_at|time:"H:i" }}
+                                        </small>         
+                                    {% endif %} 
                                 </td>
-                                <td>
+                                <td class="text-center align-middle">
                                     <a href="#" class="btn btn-primary btn-sm" data-toggle="dropdown" title="More" ><i class="fa-solid fa-ellipsis"></i></a>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item d-flex align-items-center text-default" href="">
-                                            <i class="fa-solid fa-circle-plus text-primary"></i> 
+                                            <i class="fa-solid fa-magnifying-glass text-primary"></i> 
                                             <span>Lihat Detail</span>
+                                            
                                         </a>
                                         <a class="dropdown-item d-flex align-items-center text-default" href="">
-                                            <i class="fa-solid fa-circle-check text-primary"></i> 
-                                            <span>Edit Rekam Medis</span>
+                                            <i class="fa-solid fa-pencil text-primary"></i>
+                                            <span>Edit</span>
                                         </a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="">
-                                            <i class="fa-solid fa-ban text-danger"></i> 
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'riwayat_rekam_medis_pasien' item.registrasi.pasien.id %}">
+                                            <i class="fa-solid fa-clock text-primary"></i>
                                             <span>Lihat Riwayat</span>
                                         </a>
                                     </div>

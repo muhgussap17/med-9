@@ -41,10 +41,19 @@
             border-bottom: 2px solid #007bff; /* warna biru Bootstrap */
             font-weight: 600;
         }
+        /* Custom width classes (optional, atau langsung pakai inline style) */
+        .w-10 { width: 10% !important; }
+        .w-15 { width: 15% !important; }
+        .w-25 { width: 25% !important; }
     </style>
 </head>
 
 <body class="g-sidenav-pinned">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
     <!-- Sidenav -->
     <nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white" id="sidenav-main">
         <div class="scrollbar-inner">
@@ -207,6 +216,7 @@
     <script src="{% static 'assets/vendor/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js' %}"></script>
     <!-- Argon JS -->
     <script src="{% static 'assets/js/argon.js' %}"></script>
+
     {% block scripts %}
     {% endblock %}
 </body>

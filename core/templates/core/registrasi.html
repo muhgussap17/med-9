@@ -4,8 +4,7 @@
 {% block title %}Registrasi{% endblock %}
 
 {% block content %}
-<!-- Page content -->
- <!-- Header -->
+<!-- Header -->
 <div class="header pb-6">
     <div class="container-fluid">
         <div class="header-body">
@@ -62,8 +61,10 @@
     </div>
 </div>
 <!-- End Header -->
+
+<!-- Page content -->
 <div class="container-fluid mt--6">
-    <!-- Row 1 - Antrian Registrasi -->
+    <!-- Main Row -->
     <div class="row">
         <div class="col">
             <!-- Filter Status -->
@@ -81,31 +82,30 @@
                     <a class="nav-link {% if status_filter == 'batal' %}active{% endif %}" href="?status=batal{% if tanggal_filter %}&tanggal={{ tanggal_filter }}{% endif %}">Batal</a>
                 </li>
             </ul>
-            <!-- End Filter -->
+            <!-- End Filter Status -->
             <div class="card">
                 <!-- DataTable List Antrian Registrasi -->
                 <div class="table-responsive py-3">
-                    <!-- <table class="table table-flush" id="datatable-basic"> -->
                     <table id="datatable-basic" class="table table-flush table-striped">                         
                         <thead class="thead-light">
                             <tr>
-                                <th>No. Antri</th>
+                                <th style="width: 5%;" class="text-center">No. Antri</th>
                                 <th>Nama Pasien</th>
                                 <th>Waktu Konsul</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
+                                <th class="w-10 text-center">Status</th>
+                                <th class="w-10 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in registrasi_list %}
                             <tr>
-                                <td class="align-middle">{{ item.no_antrian }}</td>
+                                <td class="text-center align-middle">{{ item.no_antrian }}</td>
                                 <td class="align-middle">{{ item.pasien.nama_lengkap }}</td>
                                 <td class="align-middle">
                                     {{ item.tanggal|date:"d M Y" }}<br>
                                     <small class="text-muted">{{ item.waktu|time:"H:i" }}</small>
                                 </td>
-                                <td class="align-middle">
+                                <td class="text-center align-middle">
                                     {% if item.status == 'menunggu' %}
                                         <span class="badge badge-warning">Menunggu</span>
                                     {% elif item.status == 'selesai' %}
@@ -114,16 +114,12 @@
                                         <span class="badge badge-danger">Batal</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="text-center align-middle">
                                     <a href="#" class="btn btn-primary btn-sm" data-toggle="dropdown" title="More" ><i class="fa-solid fa-ellipsis"></i></a>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'tambah_rekam_medis' item.id %}">
-                                            <i class="fa-solid fa-circle-plus text-primary"></i> 
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'buat_rekam_medis' item.id %}">
+                                            <i class="fa-solid fa-file-circle-plus text-primary"></i> 
                                             <span>Buat Rekam Medis</span>
-                                        </a>
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'selesaikan_registrasi' item.id %}">
-                                            <i class="fa-solid fa-circle-check text-primary"></i> 
-                                            <span>Selesaikan</span>
                                         </a>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'batalkan_registrasi' item.id %}">
@@ -141,7 +137,8 @@
             </div>
         </div>
     </div>
-    <!-- End Row 1 -->
+    <!-- End Main Row -->
+
     <!-- Footer -->
     <footer class="footer pt-0">
         <div class="row align-items-center justify-content-lg-between">

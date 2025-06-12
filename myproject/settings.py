@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'myproject.middleware.current_user.CurrentUserMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -141,6 +142,7 @@ STATICFILES_DIRS = [
 ]
 
 # AUTHENTICATION SETTINGS
+# AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 

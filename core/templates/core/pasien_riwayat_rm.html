@@ -40,6 +40,7 @@
     </div>
 </div>
 <!-- End Header -->
+ 
 <!-- Page content -->
 <div class="container-fluid mt--6">
     <!-- Row 1 - Identitas Singkat Pasien -->
@@ -49,29 +50,29 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12 col-md-4">
-                            <label for="nama_lengkap" class="form-control-label mb-0">Nama Lengkap</label>
+                            <label class="form-control-label mb-0">Nama Lengkap</label>
                             <p>{{ pasien.nama_lengkap }}</p>
                         </div>
                         <div class="col-12 col-md-4">
-                            <label for="no_rm" class="form-control-label mb-0">Tanggal Lahir</label>
+                            <label class="form-control-label mb-0">Tanggal Lahir</label>
                             <p>{{ pasien.tanggal_lahir|date:"j F Y" }} <span class="text-muted">({{ pasien.umur_tahun }})</span></p>
                         </div>
                         <div class="col-12 col-md-4">
-                            <label for="nomor_hp" class="form-control-label mb-0">No. Telepon</label>
+                            <label class="form-control-label mb-0">No. Telepon</label>
                             <p>{{ pasien.nomor_hp|default:"-" }}</p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-12 col-md-4">
-                            <label for="no_rm" class="form-control-label mb-0">No. Rekam Medis</label>
+                            <label class="form-control-label mb-0">No. Rekam Medis</label>
                             <p class="mb-0">{{ pasien.no_rm }}</p>
                         </div>
                         <div class="col-12 col-md-4">
-                            <label for="jenis_kelamin" class="form-control-label mb-0">Jenis Kelamin</label>
+                            <label class="form-control-label mb-0">Jenis Kelamin</label>
                             <p class="mb-0">{{ pasien.get_jenis_kelamin_display|default:"-" }}</p>
                         </div>
                         <div class="col-12 col-md-4">
-                            <label for="nik" class="form-control-label mb-0">Alamat</label>
+                            <label class="form-control-label mb-0">Alamat</label>
                             <p class="mb-0">{{ pasien.alamat|default:"-" }}</p>
                         </div>
                     </div>
@@ -85,20 +86,16 @@
     <!-- Row 2 - Data Table Riwayat Konsultasi -->
     <div class="row">
         <div class="col">
-            <!-- Filter Status -->
-            <!-- End Filter -->
             <div class="card">
-                <!-- DataTable List Antrian Registrasi -->
                 <div class="table-responsive py-3">
-                    <!-- <table class="table table-flush" id="datatable-basic"> -->
                     <table id="datatable-basic" class="table table-flush table-striped">                         
                         <thead class="thead-light">
                             <tr>
-                                <th>Tanggal</th>
-                                <th>Anamnesa</th>
-                                <th>Diagnosis</th>
-                                <th>Medikamentosa</th>
-                                <th>Aksi</th>
+                                <th class="w-15">Tanggal</th>
+                                <th class="w-25">Anamnesa</th>
+                                <th class="w-25">Diagnosis</th>
+                                <th class="w-25">Medikamentosa</th>
+                                <th class="w-10 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -108,12 +105,31 @@
                                   {{ item.created_at|date:"d M Y" }}<br>
                                   <small class="text-muted">{{ item.created_at|time:"H:i" }}</small>
                                 </td>                                
-                                <td class="align-middle">{{ item.keluhan_utama }}</td>
-                                <td class="align-middle">{{ item.kode_diagnosis }}</td>
-                                <td class="align-middle">{{ item.catatan_diagnosis }}</td>
-                                <td>
-                                    <a href="{% url 'edit_pasien' pasien.id %}" class="btn btn-primary btn-sm" title="Lihat Detail">
-                                        <i class="fa-solid fa-eye"></i>
+                                <td class="align-middle">{{ item.keluhan_utama|default:'' }}</td>
+                                <td class="align-middle text-wrap">
+                                    {% if item.kode_diagnosis %}
+                                        {{ item.kode_diagnosis }}
+                                    {% elif item.diagnosis %}
+                                        {{ item.diagnosis }}
+                                    {% else %}
+                                        <em class="text-muted">Belum ada</em>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-wrap" style="max-width: 250px; white-space: normal;">
+                                    {% if item.medikamentosa or item.non_medikamentosa %}
+                                        {% if item.medikamentosa %}
+                                            {{ item.medikamentosa }}<br>
+                                        {% endif %}
+                                        {% if item.non_medikamentosa %}
+                                            <small class="text-muted">{{ item.non_medikamentosa }}</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <em class="text-muted">Tidak ada terapi</em>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    <a href="#" class="btn btn-primary btn-sm" title="Lihat Detail">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -121,7 +137,6 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- End DataTable List Antrian Registrasi -->
             </div>
         </div>
     </div>

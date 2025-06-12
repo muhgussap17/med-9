@@ -4,7 +4,6 @@
 {% block title %}Pasien{% endblock %}
 
 {% block content %}
-<!-- Page content -->
 <!-- Header -->
 <div class="header pb-6">
     <div class="container-fluid">
@@ -21,18 +20,18 @@
                                 <a href="{% url 'dashboard' %}"><i class="fas fa-home text-default"></i></a>
                             </li>
                             {% if breadcrumbs %}
-                                {% for item in breadcrumbs %}
+                            {% for item in breadcrumbs %}
                                     {% if forloop.last %}
                                         <li class="breadcrumb-item text-muted active" aria-current="page">{{ item.title }}</li>
-                                    {% else %}
+                                        {% else %}
                                         <li class="breadcrumb-item">
                                             <a href="{{ item.url }}" class="text-primary">{{ item.title }}</a>
                                         </li>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
-                            {% endif %}
+                                        {% endif %}
+                                        {% endfor %}
+                                        {% else %}
+                                        <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+                                        {% endif %}
                         </ol>
                     </nav>
                 </div>
@@ -47,13 +46,10 @@
     </div>
 </div>
 <!-- End Header -->
+
+<!-- Page content -->
 <div class="container-fluid mt--6">
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-    <!-- Row 1 - List Pasien -->
+    <!-- Main Row -->
     <div class="row">
         <div class="col">
             <!-- Filter Status -->
@@ -79,8 +75,8 @@
                                 <th>No. RM</th>
                                 <th>Tgl. Lahir</th>
                                 <th>NIK</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
+                                <th class="w-10 text-center">Status</th>
+                                <th class="w-10 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -88,9 +84,9 @@
                             <tr>
                                 <td class="align-middle"><a class="text-default" href="{% url 'detail_pasien' pasien.id %}">{{ pasien.nama_lengkap }}</a></td>
                                 <td class="align-middle">{{ pasien.no_rm }}</td>
-                                <td class="align-middle ">{{ pasien.tanggal_lahir|date:"d M Y" }}</td>
-                                <td class="align-middle ">{{ pasien.nik }}</td>
-                                <td class="align-middle">
+                                <td class="align-middle">{{ pasien.tanggal_lahir|date:"d M Y" }}</td>
+                                <td class="align-middle">{{ pasien.nik }}</td>
+                                <td class="text-center align-middle">
                                     {% if pasien.status == 'aktif' %}
                                         <span class="badge badge-success">Aktif</span>
                                     {% elif pasien.status == 'nonaktif' %}
@@ -99,22 +95,22 @@
                                         <span class="badge badge-light">{{ pasien.get_status_display }}</span>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    <a href="{% url 'edit_pasien' pasien.id %}" class="btn btn-primary btn-sm" title="Edit">
-                                        <i class="fa-solid fa-pencil"></i>
-                                    </a>
-                                    <a href="{% url 'riwayat_rekam_medis' pasien.id %}" class="btn btn-primary btn-sm" title="Riwayat Rekam Medis">
-                                        <i class="fa-solid fa-clock"></i>
-                                        <!-- <i class="fa-solid fa-clipboard-list"></i> -->
-                                        <!-- <i class="fa-solid fa-file-medical"></i> -->
-                                    </a>
+                                <td class="text-center align-middle">
                                     <a href="#" class="btn btn-primary btn-sm" data-toggle="dropdown" title="More" ><i class="fa-solid fa-ellipsis"></i></a>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'detail_pasien' pasien.id %}">
-                                            <i class="fa-solid fa-eye text-primary"></i> 
+                                            <i class="fa-solid fa-magnifying-glass text-primary"></i> 
                                             <span>Lihat Detail</span>
                                         </a>
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'tambah_registrasi' pasien.id %}">
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'edit_pasien' pasien.id %}">
+                                            <i class="fa-solid fa-pencil text-primary"></i>
+                                            <span>Edit</span>
+                                        </a>
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'riwayat_rekam_medis_pasien' pasien.id %}" >
+                                            <i class="fa-solid fa-clock text-primary"></i>
+                                            <span>Riwayat Rekam Medis</span>
+                                        </a>
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'buat_registrasi_pasien' pasien.id %}">
                                             <i class="fa-solid fa-file-pen text-primary"></i> 
                                             <span>Buat Registrasi</span>
                                         </a>
@@ -139,6 +135,7 @@
         </div>
     </div>
     <!-- End Row 2 -->
+
     <!-- Footer -->
     <footer class="footer pt-0">
         <div class="row align-items-center justify-content-lg-between">

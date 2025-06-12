@@ -40,6 +40,7 @@
     </div>
 </div>
 <!-- End Header -->
+ 
 <!-- Page Content -->
 <div class="container-fluid mt--6">
     <!-- Main Row -->
@@ -141,7 +142,7 @@
                     </div>
                     <div class="row mt-2">
                         <div class="col-12">
-                            <a href="{% url 'riwayat_rekam_medis' pasien.id %}" class="btn btn-outline-primary btn-block">Riwayat Rekam Medis</a>
+                            <a href="{% url 'riwayat_rekam_medis_pasien' pasien.id %}" class="btn btn-outline-primary btn-block">Riwayat Rekam Medis</a>
                         </div>
                     </div>
                     <div class="row mt-2">
@@ -153,7 +154,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <a href="{% url 'tambah_registrasi' pasien.id %}" class="btn btn-outline-primary btn-block">Buat Registrasi</a>
+                            <a href="{% url 'buat_registrasi_pasien' pasien.id %}" class="btn btn-outline-primary btn-block">Buat Registrasi</a>
                         </div>
                     </div>
                 </div>
@@ -174,6 +175,7 @@
         </div>
     </div>
     <!-- End Main Row -->
+
     <!-- Footer -->
     <footer class="footer pt-0">
         <div class="row align-items-center justify-content-lg-between">

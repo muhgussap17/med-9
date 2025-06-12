@@ -15,7 +15,6 @@ class RekamMedisAdmin(admin.ModelAdmin):
     search_fields = ('registrasi__pasien__nama_lengkap', 'keluhan_utama', 'diagnosis')
     readonly_fields = ('created_at', 'updated_at')
     autocomplete_fields = ('registrasi', 'kode_diagnosis')
-    allowed_filters = ["registrasi__pasien__id__exact"]
 
     fieldsets = (
         ('📌 Informasi Umum', {
@@ -23,18 +22,32 @@ class RekamMedisAdmin(admin.ModelAdmin):
         }),
         ('🩺 Subjective / Anamnesis', {
             'fields': (
-                'keluhan_utama', 'riwayat_penyakit',
+                'keluhan_utama',
+                'riwayat_penyakit',
                 'riwayat_alergi',
             ),
         }),
         ('📊 Objective', {
             'fields': (
-                'status_kesadaran', 'suhu_tubuh', 'sistole', 'diastole',
-                'nadi', 'frekuensi_pernafasan', 'tinggi_badan', 'berat_badan',
+                'status_kesadaran',
+                'suhu_tubuh', 'sistole', 'diastole',
+                'nadi', 'frekuensi_pernafasan',
+                'tinggi_badan', 'berat_badan',
             ),
         }),
         ('📋 Assessment', {
-            'fields': ('kode_diagnosis', 'diagnosis'),
+            'fields': (
+                'kode_diagnosis',
+                'diagnosis',
+                'prognosis',
+            ),
+        }),
+        ('🧪 Plan / Rencana Terapi', {
+            'fields': (
+                'medikamentosa',
+                'non_medikamentosa',
+                'status_pulang',
+            ),
         }),
         ('🕓 Waktu', {
             'fields': ('created_at', 'updated_at'),
@@ -43,18 +56,18 @@ class RekamMedisAdmin(admin.ModelAdmin):
 
     def get_pasien(self, obj):
         return obj.registrasi.pasien.nama_lengkap
-    get_pasien.short_description = 'Pasien' # type: ignore
+    get_pasien.short_description = 'Pasien'
 
     def get_tanggal_registrasi(self, obj):
         return obj.registrasi.tanggal
-    get_tanggal_registrasi.short_description = 'Tgl Registrasi' # type: ignore
+    get_tanggal_registrasi.short_description = 'Tgl Registrasi'
 
-    # Logika untuk update status registrasi
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         if obj.registrasi.status != 'selesai':
             obj.registrasi.status = 'selesai'
             obj.registrasi.save()
+
 
 # Admin untuk Registrasi
 @admin.register(Registrasi)
