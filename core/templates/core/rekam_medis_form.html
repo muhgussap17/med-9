@@ -1,7 +1,13 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}{{ pasien.nama_lengkap }} | Buat Rekam Medis{% endblock %}
+{% block title %}
+    {% if mode == "edit" %}
+        {{ pasien.nama_lengkap }} | Edit Rekam Medis
+    {% else %}
+        {{ pasien.nama_lengkap }} | Buat Rekam Medis
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 <!-- Header -->
@@ -10,7 +16,7 @@
         <div class="header-body">
             <!-- Breadcrumb -->
             <div class="row align-items-center pt-4 pb-4">
-                <div class="col-lg-6 col-7">
+                <div class="col-12">
                     <h6 class="h2 text-default d-inline-block mb-0">
                         {{ page_title|default:"Judul Halaman" }}
                     </h6>
@@ -22,7 +28,7 @@
                             {% if breadcrumbs %}
                                 {% for item in breadcrumbs %}
                                     {% if forloop.last %}
-                                        <li class="breadcrumb-item text-default active" aria-current="page">{{ item.title }}</li>
+                                        <li class="breadcrumb-item text-muted active" aria-current="page">{{ item.title }}</li>
                                     {% else %}
                                         <li class="breadcrumb-item">
                                             <a href="{{ item.url }}" class="text-default">{{ item.title }}</a>
@@ -115,18 +121,17 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Riwayat Penyakit -->
+                                        <!-- Riwayat Penyakit & Alergi -->
                                         <div class="row">
-                                            <div class="col-md-12">
+                                            <!-- Riwayat Penyakit -->
+                                            <div class="col-12 col-md-6">
                                                 <div class="form-group">
                                                     <label for="riwayat_penyakit" class="form-control-label">Riwayat Penyakit</label>
                                                     <input type="text" class="form-control" id="riwayat_penyakit" name="riwayat_penyakit" value="{{ form.riwayat_penyakit.value|default:'' }}" placeholder="Masukkan riwayat penyakit">
                                                 </div>
                                             </div>
-                                        </div>
-                                        <!-- Riwayat Alergi -->
-                                        <div class="row">
-                                            <div class="col-md-12">
+                                            <!-- Riwayat Alergi -->
+                                            <div class="col-12 col-md-6">
                                                 <div class="form-group">
                                                     <label for="riwayat_alergi" class="form-control-label">Riwayat Alergi</label>
                                                     <input type="text" class="form-control" id="riwayat_alergi" name="riwayat_alergi" value="{{ form.riwayat_alergi.value|default:'' }}" placeholder="Masukkan riwayat alergi">
@@ -177,7 +182,7 @@
                                                     <td class="col-12 col-md-2 align-middle">{{ rekam_sebelumnya.suhu_tubuh|default:"-" }}</td>
                                                     <td class="col-12 col-md-2">
                                                       <div class="input-group">
-                                                        <input type="number" step="0.1" min="30" max="45" class="form-control" id="suhu_tubuh" name="suhu_tubuh" placeholder="°C">
+                                                        <input type="number" step="0.1" min="30" max="45" class="form-control" id="suhu_tubuh" value="{{ form.suhu_tubuh.value|default:''}}" name="suhu_tubuh" placeholder="°C">
                                                       </div>
                                                     </td>
                                                   </tr>
@@ -187,7 +192,7 @@
                                                     <td class="align-middle">{{ rekam_sebelumnya.sistole|default:"-" }}</td>
                                                     <td>
                                                       <div class="input-group">
-                                                        <input type="number" min="60" max="200" class="form-control" id="sistole" name="sistole" placeholder="mmHg">
+                                                        <input type="number" min="60" max="200" class="form-control" id="sistole" name="sistole" value="{{ form.sistole.value|default:''}}" placeholder="mmHg">
                                                       </div>
                                                     </td>
                                                   </tr>
@@ -197,7 +202,7 @@
                                                     <td class="align-middle">{{ rekam_sebelumnya.diastole|default:"-" }}</td>
                                                     <td>
                                                       <div class="input-group">
-                                                        <input type="number" min="40" max="150" class="form-control" id="diastole" name="diastole" placeholder="mmHg">
+                                                        <input type="number" min="40" max="150" class="form-control" id="diastole" name="diastole" value="{{ form.diastole.value|default:''}}" placeholder="mmHg">
                                                       </div>
                                                     </td>
                                                   </tr>
@@ -207,7 +212,7 @@
                                                     <td class="align-middle">{{ rekam_sebelumnya.nadi|default:"-" }}</td>
                                                     <td>
                                                       <div class="input-group">
-                                                        <input type="number" min="40" max="200" class="form-control" id="nadi" name="nadi" placeholder="x/menit">
+                                                        <input type="number" min="40" max="200" class="form-control" id="nadi" name="nadi" value="{{ form.nadi.value|default:''}}" placeholder="x/menit">
                                                       </div>
                                                     </td>
                                                   </tr>
@@ -217,7 +222,7 @@
                                                     <td class="align-middle">{{ rekam_sebelumnya.frekuensi_pernafasan|default:"-" }}</td>
                                                     <td>
                                                       <div class="input-group">
-                                                        <input type="number" min="10" max="60" class="form-control" id="frekuensi_pernafasan" name="frekuensi_pernafasan" placeholder="x/menit">
+                                                        <input type="number" min="10" max="60" class="form-control" id="frekuensi_pernafasan" name="frekuensi_pernafasan" value="{{ form.frekuensi_pernafasan.value|default:''}}" placeholder="x/menit">
                                                       </div>
                                                     </td>
                                                   </tr>
@@ -227,7 +232,7 @@
                                                     <td class="align-middle">{{ rekam_sebelumnya.tinggi_badan|default:"-" }}</td>
                                                     <td>
                                                       <div class="input-group">
-                                                        <input type="number" min="30" max="250" class="form-control" id="tinggi_badan" name="tinggi_badan" placeholder="cm">
+                                                        <input type="number" min="30" max="250" class="form-control" id="tinggi_badan" name="tinggi_badan" value="{{ form.tinggi_badan.value|default:''}}" placeholder="cm">
                                                       </div>
                                                     </td>
                                                   </tr>
@@ -237,7 +242,7 @@
                                                     <td class="align-middle">{{ rekam_sebelumnya.berat_badan|default:"-" }}</td>
                                                     <td>
                                                       <div class="input-group">
-                                                        <input type="number" min="3" max="250" step="0.1" class="form-control" id="berat_badan" name="berat_badan" placeholder="kg">
+                                                        <input type="number" min="3" max="250" step="0.1" class="form-control" id="berat_badan" name="berat_badan" value="{{ form.berat_badan.value|default:''}}" placeholder="kg">
                                                       </div>
                                                     </td>
                                                   </tr>
@@ -258,30 +263,30 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label for="kode_diagnosis" class="form-control-label">ICD-10 <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="kode_diagnosis" name="kode_diagnosis" placeholder="Kode diagnosis">
-                                                    <!-- <select class="form-control" id="kode_diagnosis" name="kode_diagnosis">
-                                                        <option value="">Pilih</option>
+                                                    <!-- <input type="text" class="form-control" id="kode_diagnosis" name="kode_diagnosis" placeholder="Kode diagnosis"> -->
+                                                    <select class="form-control" id="kode_diagnosis" name="kode_diagnosis">
+                                                        <option value="" disabled selected hidden>Pilih</option>
                                                         {% for icd in icd_list %}
-                                                        <option value="{{ icd.kode }}">{{ icd.kode }} - {{ icd.nama }}</option>
+                                                            <option value="{{ icd.id }}"
+                                                                {% if form.kode_diagnosis.value|stringformat:"s" == icd.id|stringformat:"s" %}selected{% endif %}>
+                                                                {{ icd.kode }} - {{ icd.deskripsi }}
+                                                            </option>
                                                         {% endfor %}
-                                                    </select> -->
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
                 
                                         <!-- Diagnosis -->
                                         <div class="row">
-                                            <div class="col-md-12">
+                                            <div class="col-12 col-md-6">
                                                 <div class="form-group">
                                                     <label for="diagnosis" class="form-control-label">Diagnosis <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="diagnosis" name="diagnosis" placeholder="Deskripsi diagnosis">
+                                                    <input type="text" class="form-control" id="diagnosis" name="diagnosis" value="{{ form.diagnosis.value|default:'' }}" placeholder="Opsional jika kode tidak ditemukan">
                                                 </div>
                                             </div>
-                                        </div>
-                
-                                        <!-- Prognosis -->
-                                        <div class="row">
-                                            <div class="col-md-12">
+                                            <!-- Prognosis -->
+                                            <div class="col-12 col-md-6">
                                                 <div class="form-group">
                                                     <label for="prognosis" class="form-control-label">Prognosis <span class="text-danger">*</span></label>
                                                     <select class="form-control" id="prognosis" name="prognosis">
@@ -307,11 +312,11 @@
                                         <div class="row">
                                             <div class="col-12 col-md-6 form-group">
                                                 <label for="medikamentosa" class="form-control-label">Medikamentosa (Terapi Obat)</label>
-                                                <textarea class="form-control" id="medikamentosa" name="medikamentosa" rows="3" placeholder="Masukkan deskripsi"></textarea>
+                                                <textarea class="form-control" id="medikamentosa" name="medikamentosa" rows="3" placeholder="Masukkan deskripsi">{{ form.medikamentosa.value|default:'' }}</textarea>
                                             </div>
                                             <div class="col-12 col-md-6 form-group">
-                                                <label for="non_medikamentosa" class="form-control-label">Non-Medikamentosa (Terapi Obat)</label>
-                                                <textarea class="form-control" id="non_medikamentosa" name="non_medikamentosa" rows="3" placeholder="Masukkan deskripsi"></textarea>
+                                                <label for="non_medikamentosa" class="form-control-label">Non-Medikamentosa (Terapi Tanpa Obat)</label>
+                                                <textarea class="form-control" id="non_medikamentosa" name="non_medikamentosa" rows="3" placeholder="Masukkan deskripsi">{{ form.non_medikamentosa.value|default:'' }}</textarea>
                                             </div>
                                         </div>
                 
@@ -340,12 +345,22 @@
                                         <!-- Tombol Simpan & Batal -->
                                         <div class="row">
                                             <div class="col-12">
-                                                <button type="submit" form="formRekam" class="btn btn-primary btn-block">Simpan</button>
+                                                <button type="submit" form="formRekam" class="btn btn-primary btn-block">
+                                                    {% if mode == "edit" %}
+                                                        Simpan Perubahan
+                                                    {% else %}
+                                                        Simpan
+                                                    {% endif %}
+                                                </button>
                                             </div>
                                         </div>
                                         <div class="row mt-2">
                                             <div class="col-12">
-                                                <a href="{% url 'daftar_registrasi' %}" class="btn btn-outline-primary btn-block">Batal</a>
+                                                {% if mode == "edit" %}
+                                                    <a href="{% url 'daftar_rekam_medis' %}" class="btn btn-outline-primary btn-block">Batal</a>
+                                                {% else %}
+                                                    <a href="{% url 'daftar_registrasi' %}" class="btn btn-outline-primary btn-block">Batal</a>
+                                                {% endif %}                                            
                                             </div>
                                         </div>
                                     </div>
@@ -381,12 +396,12 @@
                                         </td>
                                         <td class="align-middle text-wrap" style="max-width: 250px; white-space: normal;">
                                             {% if item.medikamentosa or item.non_medikamentosa %}
-                                            {% if item.medikamentosa %}{{ item.medikamentosa }}<br>{% endif %}
-                                            {% if item.non_medikamentosa %}<small class="text-muted">{{ item.non_medikamentosa }}</small>{% endif %}
+                                            {% if item.medikamentosa %} {{ item.medikamentosa }} {% endif %}
+                                            {% if item.non_medikamentosa %} {{ item.non_medikamentosa }} {% endif %}
                                             {% else %}<em class="text-muted">Tidak ada terapi</em>
                                             {% endif %}
                                         </td>
-                                        <td class="text-center">
+                                        <td class="align-middle text-center">
                                             <a href="#" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></a>
                                         </td>
                                     </tr>

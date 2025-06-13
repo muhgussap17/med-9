@@ -9,11 +9,12 @@ from django.urls import reverse
 class RekamMedisAdmin(admin.ModelAdmin):
     list_display = (
         'get_pasien', 'get_tanggal_registrasi',
-        'keluhan_utama', 'kode_diagnosis', 'status_kesadaran', 'created_at',
+        'keluhan_utama', 'kode_diagnosis', 'status_kesadaran',
+        'created_by', 'updated_by', 'created_at',
     )
-    list_filter = ['created_at']
+    list_filter = ['created_at', 'created_by']
     search_fields = ('registrasi__pasien__nama_lengkap', 'keluhan_utama', 'diagnosis')
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
     autocomplete_fields = ('registrasi', 'kode_diagnosis')
 
     fieldsets = (
@@ -49,24 +50,29 @@ class RekamMedisAdmin(admin.ModelAdmin):
                 'status_pulang',
             ),
         }),
-        ('🕓 Waktu', {
-            'fields': ('created_at', 'updated_at'),
+        ('🕓 Metadata', {
+            'fields': ('created_by', 'updated_by', 'created_at', 'updated_at'),
         }),
     )
 
     def get_pasien(self, obj):
         return obj.registrasi.pasien.nama_lengkap
-    get_pasien.short_description = 'Pasien'
+    get_pasien.short_description = 'Pasien' # type: ignore
 
     def get_tanggal_registrasi(self, obj):
         return obj.registrasi.tanggal
-    get_tanggal_registrasi.short_description = 'Tgl Registrasi'
+    get_tanggal_registrasi.short_description = 'Tgl Registrasi' # type: ignore
 
     def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
+        if not change:
+            obj.created_by = request.user
+        obj.updated_by = request.user
+
         if obj.registrasi.status != 'selesai':
             obj.registrasi.status = 'selesai'
             obj.registrasi.save()
+
+        super().save_model(request, obj, form, change)
 
 
 # Admin untuk Registrasi

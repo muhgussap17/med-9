@@ -26,7 +26,10 @@ urlpatterns = [
     # URL Rekam Medis
     path('rekam-medis/', views.daftar_rekam_medis, name='daftar_rekam_medis'),
     path('rekam-medis/buat-rm/<int:registrasi_id>/', views.buat_rekam_medis, name='buat_rekam_medis'),
-    # Edit
+    path('rekam-medis/<int:rekam_id>/edit/', views.edit_rekam_medis, name='edit_rekam_medis'),
+    path('rekam-medis/<int:rekam_id>/detail/', views.detail_rekam_medis, name='detail_rekam_medis'),
+
     # Detail
     # URL Rekam Medis lainnya
+    path('rekam-medis/<int:rekam_id>/resume/', views.resume_medis_view, name='resume_medis'),
 ]

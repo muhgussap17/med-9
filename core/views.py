@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from django.forms import modelformset_factory
+from django.utils.timezone import now
 from datetime import date, timedelta, datetime
 
 from .models import *
@@ -20,6 +20,13 @@ def get_pasien_choices_context():
         'jenis_kelamin_choices': JenisKelaminChoices.choices,
         'status_merokok_choices': StatusPerokokChoices.choices,
         'golongan_darah_choices': GolonganDarahChoices.choices,
+    }
+
+def get_rekam_medis_choices_context():
+    return {
+        'prognosis_choices': PrognosisChoices.choices,
+        'status_kesadaran_choices': StatusKesadaranChoices.choices,
+        'status_pulang_choices': StatusPulangChoices.choices,
     }
 
 def login_view(request):
@@ -50,37 +57,35 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    ########## Dashboard dapat Mengambil Registrasi ########## 
-    status_filter = request.GET.get('status')
-    tanggal_filter = request.GET.get("tanggal")
-
     today = date.today()
     queryset = Registrasi.objects.select_related('pasien').order_by('-waktu')
 
-    # Default ke "menunggu" jika status_filter kosong atau tidak valid
-    if status_filter not in [StatusRegistrasiChoices.MENUNGGU, StatusRegistrasiChoices.SELESAI, StatusRegistrasiChoices.BATAL]:
-        status_filter = StatusRegistrasiChoices.MENUNGGU
+    total_terdaftar = Registrasi.objects.filter(tanggal=today).count()
+    belum_dilayani = Registrasi.objects.filter(
+        status=StatusRegistrasiChoices.MENUNGGU,
+        tanggal=today
+    ).count()
+    sudah_dilayani = Registrasi.objects.filter(
+        status=StatusRegistrasiChoices.SELESAI,
+        tanggal=today
+    ).count()
 
-    # Default ke "today" jika tanggal_filter kosong atau tidak valid
-    if tanggal_filter not in ["today", "week", "month", "year"]:
-        tanggal_filter = "today"
+    status_filter = request.GET.get('status')
+    tanggal_filter = request.GET.get("tanggal")
 
-    # Apply filter status
+
+    status_filter = StatusRegistrasiChoices.MENUNGGU
+
+    tanggal_filter = today
+
     queryset = queryset.filter(status=status_filter)
-
-    # Apply filter tanggal
-    if tanggal_filter == "today":
-        queryset = queryset.filter(tanggal=today)
-    elif tanggal_filter == "week":
-        start_of_week = today - timedelta(days=today.weekday())  # Senin
-        queryset = queryset.filter(tanggal__range=[start_of_week, today])
-    elif tanggal_filter == "month":
-        queryset = queryset.filter(tanggal__year=today.year, tanggal__month=today.month)
-    elif tanggal_filter == "year":
-        queryset = queryset.filter(tanggal__year=today.year)
-
+    queryset = queryset.filter(tanggal=today)
+    
     context = {
         'data_registrasi': queryset,
+        'total_terdaftar': total_terdaftar,
+        'belum_dilayani': belum_dilayani,
+        'sudah_dilayani': sudah_dilayani,
         'status_filter': status_filter,
         'tanggal_filter': tanggal_filter,
         "page_title": "Dashboard",
@@ -138,13 +143,14 @@ def tambah_pasien(request): # UDAH FIX
 
     context = {
         'form': form,
+        'mode': 'tambah',
 
         'page_title': 'Tambah Pasien',
         'breadcrumbs': breadcrumbs,
 
         **get_pasien_choices_context(),
     }
-    return render(request, 'core/pasien_tambah.html', context)
+    return render(request, 'core/pasien_form.html', context)
 
 @login_required
 def detail_pasien(request, pk): # UDAH FIX
@@ -187,13 +193,14 @@ def edit_pasien(request, pk): # UDAH FIX
     context = {
         'form': form,
         'pasien': pasien,
+        'mode': 'edit',
 
         'page_title': 'Edit Pasien',
         'breadcrumbs': breadcrumbs,
         
         **get_pasien_choices_context(),
     }
-    return render(request, 'core/pasien_edit.html', context)   
+    return render(request, 'core/pasien_form.html', context)   
 
 @login_required
 def riwayat_rekam_medis_pasien(request, pasien_id): # UDAH FIX
@@ -248,10 +255,14 @@ def nonaktifkan_pasien(request, pk): # UDAH FIX
 ####################################################################################################################################################################################
 @login_required
 def daftar_registrasi(request): # UDAH FIX 
+    batas_waktu = timezone.now() - timedelta(hours=24)
+    Registrasi.objects.filter(
+        status=StatusRegistrasiChoices.MENUNGGU,
+        waktu__lt=batas_waktu
+    ).update(status=StatusRegistrasiChoices.BATAL)
+
     status_filter = request.GET.get('status')
     tanggal_filter = request.GET.get('tanggal')
-
-    print("TANGGAL FILTER MASUK:", tanggal_filter)  # 🔍 Debug print
 
     queryset = Registrasi.objects.select_related('pasien').order_by('-waktu')
 
@@ -277,12 +288,12 @@ def daftar_registrasi(request): # UDAH FIX
         tanggal_filter = None
 
     breadcrumbs = [
-        {"title": "Registrasi", "url": "/registrasi/"},
+        {'title': 'Registrasi', 'url': '/registrasi/'},
     ]
     context = {
         'registrasi_list': queryset,
         'status_filter': status_filter,
-        'tanggal_filter': tanggal_filter or '',
+        'tanggal_filter': tanggal_filter,
 
         "page_title": "Registrasi",
         "breadcrumbs": breadcrumbs,
@@ -299,6 +310,51 @@ def batalkan_registrasi(request, pk): # UDAH FIX
 
     return redirect('daftar_registrasi')
 
+
+
+#####################################################################################################################################################################################
+################################################################################# FITUR REKAM MEDIS #################################################################################
+#####################################################################################################################################################################################
+@login_required
+def daftar_rekam_medis(request):
+    tanggal_filter = request.GET.get('tanggal')
+    
+    rekam_list = RekamMedis.objects.select_related(
+        'registrasi', 'registrasi__pasien'
+    )
+
+    parsed_date = None
+    if tanggal_filter:
+        for fmt in ['%Y-%m-%d', '%m/%d/%Y']:  # tambahkan format ini
+            try:
+                parsed_date = datetime.strptime(tanggal_filter, fmt).date()
+                break
+            except ValueError:
+                continue
+    else:
+        parsed_date = date.today()
+
+    if parsed_date:
+        rekam_list = rekam_list.filter(created_at__date=parsed_date)
+    else:
+        tanggal_filter = None
+
+    rekam_list = rekam_list.order_by('-created_at')
+
+    breadcrumbs = [
+        {'title': 'Rekam Medis', 'url': '/rekam-medis/'},
+    ]
+
+    context = {
+        'rekam_list': rekam_list,
+        'tanggal_filter': tanggal_filter,
+        
+        'page_title': 'Rekam Medis',
+        'breadcrumbs': breadcrumbs,
+    }
+
+    return render(request, 'core/rekam_medis.html', context)
+
 @login_required
 def buat_rekam_medis(request, registrasi_id):
     registrasi = get_object_or_404(Registrasi, id=registrasi_id)
@@ -314,6 +370,9 @@ def buat_rekam_medis(request, registrasi_id):
         .filter(registrasi__pasien=pasien) \
         .order_by('-created_at')
     
+    # Mengambil semua kode diagnosis dalam tabel ICD10
+    icd_list = ICD10.objects.all().order_by('kode')
+
     if request.method == 'POST':
         form = RekamMedisForm(request.POST)
         if form.is_valid():
@@ -338,46 +397,97 @@ def buat_rekam_medis(request, registrasi_id):
     
     context = {
         'form': form,
+        'mode': 'buat',
         'registrasi': registrasi,
         'pasien': pasien,
         'rekam_sebelumnya': rekam_sebelumnya, # Untuk Tab Resume Medis bagian Objective
         'rekam_list': rekam_list, # Untuk Tab Riwayat Konsul
+        'icd_list': icd_list,
 
         'page_title': "Buat Rekam Medis",
         'breadcrumbs': breadcrumbs,
 
-        'prognosis_choices': PrognosisChoices.choices,
-        'status_kesadaran_choices': StatusKesadaranChoices.choices,
-        'status_pulang_choices': StatusPulangChoices.choices,
+        **get_rekam_medis_choices_context(),
     }
-    return render(request, 'core/rekam_medis_tambah.html', context)
+    return render(request, 'core/rekam_medis_form.html', context)
 
-
-#####################################################################################################################################################################################
-################################################################################# FITUR REKAM MEDIS #################################################################################
-#####################################################################################################################################################################################
 @login_required
-def daftar_rekam_medis(request):
-    rekam_list = RekamMedis.objects.select_related(
-        'registrasi', 'registrasi__pasien'
-    ).order_by('-created_at')
+def edit_rekam_medis(request, rekam_id):
+    rekam = get_object_or_404(RekamMedis, id=rekam_id)
+    pasien = rekam.registrasi.pasien
+
+    rekam_sebelumnya =  RekamMedis.objects.filter(
+        registrasi__pasien=pasien
+    ).exclude(id=rekam_id).order_by('-created_at').first()
+
+    rekam_list = RekamMedis.objects.select_related('registrasi', 'kode_diagnosis') \
+        .filter(registrasi__pasien=pasien) \
+        .order_by('-created_at')
+    
+    icd_list = ICD10.objects.all().order_by('kode')
+    
+    if request.method == 'POST':
+        form = RekamMedisForm(request.POST, instance=rekam)
+        if form.is_valid():
+            rekam_edited = form.save(commit=False)
+            rekam_edited.updated_by = request.user
+            rekam_edited.save()
+            messages.success(request, "Rekam medis telah diperbarui.")
+            return redirect('daftar_rekam_medis')
+        else:
+            messages.error(request, "Terdapat kesalahan pada form.")
+    else:
+        form = RekamMedisForm(instance=rekam)
 
     breadcrumbs = [
         {'title': 'Rekam Medis', 'url': '/rekam-medis/'},
+        {'title': f'{pasien.nama_lengkap} | {rekam.created_at.strftime("%d %B  %Y")}', 'url': f'/rekam-medis/{rekam.id}/detail'}, # type: ignore
+        {'title': 'Edit Rekam Medis'},
     ]
 
     context = {
+        'form': form,
+        'mode': 'edit',
+        'rekam': rekam,
+        'pasien': pasien,
+        'rekam_sebelumnya': rekam_sebelumnya,
         'rekam_list': rekam_list,
-        
-        'page_title': 'Daftar Rekam Medis',
+        'icd_list': icd_list,
+
+        'page_title': 'Edit Rekam Medis',
+        'breadcrumbs': breadcrumbs,
+
+        **get_rekam_medis_choices_context(),
+    }
+    return render(request, 'core/rekam_medis_form.html', context)
+
+@login_required
+def detail_rekam_medis(request, rekam_id):
+    rekam = get_object_or_404(RekamMedis, id=rekam_id)
+    pasien = rekam.registrasi.pasien
+
+    breadcrumbs = [
+        {'title': 'Rekam Medis', 'url': '/rekam-medis/'},
+        {'title': f'{pasien.nama_lengkap} | {rekam.created_at.strftime("%d %B  %Y")}', 'url': f'/pasien/{pasien.pk}/'},
+    ]
+
+    context = {
+        'rekam': rekam,
+        'pasien': pasien,
+
+        'page_title': f'Detail Rekam Medis ',
         'breadcrumbs': breadcrumbs,
     }
+    return render(request, 'core/rekam_medis_detail.html', context)
 
-    return render(request, 'core/rekam_medis.html', context)
+@login_required
+def resume_medis_view(request, rekam_id):
+    rekam = get_object_or_404(RekamMedis, id=rekam_id)
+    pasien = rekam.registrasi.pasien
 
-# class ResepObatForm(forms.ModelForm):
-#     class Meta:
-#         model = ResepObat
-#         exclude = ['rekam_medis']
+    context = {
+        'rekam': rekam,
+        'pasien': pasien,
+    }
 
-# ResepObatFormSet = modelformset_factory(ResepObat, form=ResepObatForm, extra=1, can_delete=True)
+    return render(request, 'core/rekam_medis_cetak.html', context)

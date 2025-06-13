@@ -1,0 +1,304 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ pasien.nama_lengkap }} | Detail{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="header pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Breadcrumb -->
+            <div class="row align-items-center pt-4 pb-4">
+                <div class="col-12">
+                    <h6 class="h2 text-default d-inline-block mb-0">
+                        {{ page_title|default:"Judul Halaman" }}
+                    </h6>
+                    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home text-default"></i></a>
+                            </li>
+                            {% if breadcrumbs %}
+                                {% for item in breadcrumbs %}
+                                    {% if forloop.last %}
+                                        <li class="breadcrumb-item text-muted active" aria-current="page">{{ item.title }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item">
+                                            <a href="{{ item.url }}" class="text-default">{{ item.title }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Header -->
+ 
+<!-- Page Content -->
+<div class="container-fluid mt--6">
+    <!-- Main Row -->
+    <div class="row">
+        <!-- Kolom Utama -->
+        <div class="col-12 col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-muted">DATA PASIEN</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label class="form-control-label mb-0">Nama Lengkap</label>
+                            <p>{{ pasien.nama_lengkap }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-control-label mb-0">No. Rekam Medis</label>
+                            <p>{{ pasien.no_rm }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- SUBJECTIVE -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-muted">SUBJECTIVE</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Data Singkat Pasien -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-6">
+                            <h5 class="mb-2 text-muted">DATA UMUM</h5>
+                            <label class="form-control-label mb-0">Tanggal Lahir</label>
+                            <p>{{ pasien.tanggal_lahir|date:"j F Y" }} <span class="text-muted">({{ pasien.umur_tahun }})</span></p>
+                            <label class="form-control-label mb-0">Jenis Kelamin</label>
+                            <p>{{ pasien.get_jenis_kelamin_display|default:"-" }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <h5 class="mb-2 text-muted">DATA KESEHATAN</h5>
+                            <label class="form-control-label mb-0">Status Merokok</label>
+                            <p>{{ pasien.get_status_merokok_display|default:"-" }}</p>
+                            <label class="form-control-label mb-0">Golongan Darah</label>
+                            <p>{{ pasien.get_golongan_darah_display|default:"-" }}</p>
+                        </div>
+                    </div>
+                    <!-- Anamnesa -->
+                    <hr>
+                    <h5 class="mb-2 text-muted">ANAMNESA</h5>
+                    <div class="row">
+                        <!-- Keluhan Utama -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">Keluhan Utama</label>
+                            <p>{{ rekam.keluhan_utama|default:"-" }}</p>
+                        </div>
+                        <!-- Riwayat Penyakit -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">Riwayat Penyakit</label>
+                            <p>{{ rekam.riwayat_penyakit|default:"-" }}</p>
+                        </div>
+                        <!-- Riwayat Alergi -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">Riwayat Alergi</label>
+                            <p>{{ rekam.riwayat_alergi|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END SUBJECTIVE -->
+
+            <!-- OBJECTIVE -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-muted">OBJECTIVE</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Status Kesadaran -->
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="form-control-label">Status Kesadaran</label>
+                            <p>{{ rekam.get_status_kesadaran_display|default:"-" }}</p>
+                        </div>
+                    </div>
+                    <!-- Tanda-tanda Vital -->
+                    <h5 class="mb-2 text-muted">TANDA-TANDA VITAL</h5>
+                    <div class="table-responsive py-3">
+                        <table class="table table-flush text-center align-middle"">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Suhu Tubuh</th>
+                                    <th>Sistole</th>
+                                    <th>Diastole</th>
+                                    <th>Nadi</th>
+                                    <th>RR</th>
+                                    <th>Tinggi Badan</th>
+                                    <th>Berat Badan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ rekam.suhu_tubuh|default:"-" }}{% if rekam.suhu_tubuh %} °C{% endif %}</td>
+                                    <td>{{ rekam.sistole|default:"-" }}{% if rekam.sistole %} mmHg{% endif %}</td>
+                                    <td>{{ rekam.diastole|default:"-" }}{% if rekam.diastole %} mmHg{% endif %}</td>
+                                    <td>{{ rekam.nadi|default:"-" }}{% if rekam.nadi %} x/menit{% endif %}</td>
+                                    <td>{{ rekam.frekuensi_pernafasan|default:"-" }}{% if rekam.frekuensi_pernafasan %} x/menit{% endif %}</td>
+                                    <td>{{ rekam.tinggi_badan|default:"-" }}{% if rekam.tinggi_badan %} cm{% endif %}</td>
+                                    <td>{{ rekam.berat_badan|default:"-" }}{% if rekam.berat_badan %} kg{% endif %}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- END OBJECTIVE -->
+
+            <!-- ASSESSMENT -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-muted">ASSESSMENT</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- ICD-10 -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">ICD-10</label>
+                            <p>
+                                {% if rekam.kode_diagnosis %}
+                                    {{ rekam.kode_diagnosis.kode }} - {{ rekam.kode_diagnosis.deskripsi }}
+                                {% else %}
+                                    <em class="text-muted">-</em>
+                                {% endif %}
+                            </p>                        
+                        </div>
+                        <!-- Diagnosis -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">Diagnosis</label>
+                            <p>{{ rekam.diagnosis|default:"-" }}</p>
+                        </div>
+                        <!-- Prognosis -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">Prognosis</label>
+                            <p>{{ rekam.get_prognosis_display|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END ASSESSMENT -->
+
+            <!-- PLAN -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-muted">PLAN</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Medikamentosa (Terapi Obat) & Non-Medikamentosa (Terapi Obat) -->
+                    <div class="row">
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">Medikamentosa (Terapi Obat)</label>
+                            <p>-</p>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">Non-Medikamentosa (Terapi Tanpa Obat)</label>
+                            <p>-</p>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-control-label">Status Pulang</label>
+                            <p>-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END PLAN -->
+        </div>
+        <!-- Kolom Button -->
+        <div class="col-12 col-md-3">
+            <div class="position-sticky" style="top: 1rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <!-- Tombol Edit & Kembali -->
+                        <div class="row">
+                            <div class="col-12">
+                                <a href="{% url 'edit_rekam_medis' rekam.id %}" class="btn btn-primary btn-block">Edit Resume Medis</a>                                          
+                            </div>
+                        </div>
+                        <!-- <div class="row mt-2">
+                            <div class="col-12">
+                                <a href="{% url 'daftar_rekam_medis' %}" class="btn btn-outline-primary btn-block">Kembali</a>                                          
+                            </div>
+                        </div> -->
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <a href="{% url 'resume_medis' rekam.id %}" class="btn btn-outline-primary btn-block">Cetak</a>                                          
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Buat kondisi bagian card body ini muncul jika benar-benar mengalami perubahan -->
+                    {% if rekam.created_at|date:"Y-m-d H:i" != rekam.updated_at|date:"Y-m-d H:i" %}
+                    <div class="card-body">     
+                        <div class="row">
+                            <!-- Notifikasi -->
+                            <div class="col-12">
+                                <div class="card text-left text-warning" style="background-color: #fcebe5;">
+                                    <div class="row align-items-center justify-content-center px-3 py-2">
+                                        <i class="fa-solid fa-circle-info mr-3"></i>
+                                        <strong >Resume medis ini sudah <br> mengalami perubahan data</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Info Log -->
+                            <div class="col-12">
+                                <h5 class="mb-2 text-muted">LOG PERUBAHAN</h5>
+                                <strong>Terakhir diubah oleh 
+                                    {{ rekam.updated_by.get_full_name|default:"-" }}
+                                </strong><br>
+                                <small>{{ rekam.updated_at|date:"j F Y" }} - {{ rekam.updated_at|time:"H:i" }}</small>
+
+                                <!-- Button modal -->
+                                <div class="mt-3">
+                                    <button type="button" class="col-md-6 btn btn-outline-primary" data-toggle="modal" data-target="#modal-perubahan">Lihat Perubahan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Main Row -->
+
+    <!-- Footer -->
+    <footer class="footer pt-0">
+        <div class="row align-items-center justify-content-lg-between">
+            <div class="col-lg-6">
+                <div class="copyright text-center text-lg-left text-muted">
+                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" target="_blank">License</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <!-- End Footer -->
+</div>
+<!-- End Page content -->
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

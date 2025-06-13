@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Surat Resume Medis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2cm;
+            color: #000;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .judul-surat {
+            text-decoration: underline;
+            font-weight: bold;
+            font-size: 18pt;
+        }
+        .identitas, .section {
+            margin-top: 20px;
+            font-size: 12pt;
+        }
+        table.vital {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table.vital th, table.vital td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+            font-size: 11pt;
+        }
+        .ttd {
+            margin-top: 60px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-center">
+        <p><strong>PRAKTIK DOKTER MANDIRI</strong><br>
+        JL. Nama Jalan, Kota, Telp: 08xxxxxxx</p>
+        <hr>
+        <p class="judul-surat">SURAT RESUME MEDIS</p>
+        <p>Nomor: ____/RSM/{{ rekam.created_at|date:"Y" }}</p>
+    </div>
+
+    <div class="identitas">
+        <p>Yang bertanda tangan di bawah ini, menerangkan bahwa pasien:</p>
+        <ul style="list-style: none; padding-left: 0;">
+            <li>Nama: <strong>{{ pasien.nama_lengkap }}</strong></li>
+            <li>Nomor Rekam Medis: {{ pasien.no_rm }}</li>
+            <li>Tanggal Lahir: {{ pasien.tanggal_lahir|date:"d F Y" }} ({{ pasien.umur_tahun }})</li>
+            <li>Jenis Kelamin: {{ pasien.get_jenis_kelamin_display }}</li>
+            <li>Status Merokok: {{ pasien.get_status_merokok_display|default:"-" }}</li>
+            <li>Golongan Darah: {{ pasien.get_golongan_darah_display|default:"-" }}</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <strong>1. Anamnesa:</strong>
+        <ul style="list-style: none; padding-left: 0;">
+            <li>Keluhan Utama: {{ rekam.keluhan_utama|default:"-" }}</li>
+            <li>Riwayat Penyakit: {{ rekam.riwayat_penyakit|default:"-" }}</li>
+            <li>Riwayat Alergi: {{ rekam.riwayat_alergi|default:"-" }}</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <strong>2. Pemeriksaan Fisik:</strong><br>
+        Status Kesadaran: {{ rekam.get_status_kesadaran_display|default:"-" }}
+
+        <table class="vital">
+            <thead>
+                <tr>
+                    <th>Suhu</th>
+                    <th>Sistole</th>
+                    <th>Diastole</th>
+                    <th>Nadi</th>
+                    <th>RR</th>
+                    <th>Tinggi</th>
+                    <th>Berat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ rekam.suhu_tubuh|default:"-" }}{% if rekam.suhu_tubuh %} °C{% endif %}</td>
+                    <td>{{ rekam.sistole|default:"-" }}{% if rekam.sistole %} mmHg{% endif %}</td>
+                    <td>{{ rekam.diastole|default:"-" }}{% if rekam.diastole %} mmHg{% endif %}</td>
+                    <td>{{ rekam.nadi|default:"-" }}{% if rekam.nadi %} x/menit{% endif %}</td>
+                    <td>{{ rekam.frekuensi_pernafasan|default:"-" }}{% if rekam.frekuensi_pernafasan %} x/menit{% endif %}</td>
+                    <td>{{ rekam.tinggi_badan|default:"-" }}{% if rekam.tinggi_badan %} cm{% endif %}</td>
+                    <td>{{ rekam.berat_badan|default:"-" }}{% if rekam.berat_badan %} kg{% endif %}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <strong>3. Diagnosis & Prognosis:</strong>
+        <ul style="list-style: none; padding-left: 0;">
+            <li>ICD-10: {% if rekam.kode_diagnosis %}{{ rekam.kode_diagnosis.kode }} - {{ rekam.kode_diagnosis.deskripsi }}{% else %}-{% endif %}</li>
+            <li>Diagnosis: {{ rekam.diagnosis|default:"-" }}</li>
+            <li>Prognosis: {{ rekam.get_prognosis_display|default:"-" }}</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <strong>4. Rencana Terapi:</strong>
+        <ul style="list-style: none; padding-left: 0;">
+            <li>Medikamentosa: {{ rekam.medikamentosa|default:"-" }}</li>
+            <li>Non-Medikamentosa: {{ rekam.non_medikamentosa|default:"-" }}</li>
+            <li>Status Pulang: {{ rekam.get_status_pulang_display|default:"-" }}</li>
+        </ul>
+    </div>
+
+    <div class="ttd">
+        <p>Cirebon, {{ rekam.created_at|date:"d F Y" }}<br>
+        Dokter Pemeriksa,</p><br><br><br>
+        <p><strong>__________________________</strong></p>
+    </div>
+
+</body>
+</html>

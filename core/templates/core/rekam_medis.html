@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Pasien - Detail{% endblock %}
+{% block title %}Rekam Medis{% endblock %}
 
 {% block content %}
 <!-- Header -->
@@ -88,28 +88,24 @@
                                     <small class="text-muted">{{ item.created_at|time:"H:i"}}</small>
                                 </td>
                                 <td class="align-middle">{{ item.registrasi.pasien.nama_lengkap }}</td>
-                                <td class="align-middle"><br>
-                                    {% if item.created_at == item.updated_at %}
-                                        Dibuat oleh <strong>{{ item.created_by|default:"-" }}</strong><br>
-                                        <small class="text-muted">
-                                            {{ item.created_at|date:"d M Y" }} {{ item.created_at|time:"H:i" }}
-                                        </small>
+                                <td class="align-middle">
+                                    {% if item.updated_at|date:"U" == item.created_at|date:"U" %}
+                                        Dibuat oleh <strong>{{ item.created_by.get_full_name|default:"-" }}</strong><br>
+                                        <small class="text-muted">{{ item.created_at|date:"d M Y H:i" }}</small>
                                     {% else %}
-                                        Diubah oleh <strong>{{ item.updated_by|default:"-" }}</strong><br>
-                                        <small class="text-muted">
-                                            {{ item.updated_at|date:"d M Y" }} {{ item.updated_at|time:"H:i" }}
-                                        </small>         
+                                        <div class="text-warning">Diubah oleh <strong>{{ item.updated_by.get_full_name|default:"-" }}</strong></div>
+                                        <small class="text-muted">{{ item.updated_at|date:"d M Y H:i" }}</small>         
                                     {% endif %} 
                                 </td>
                                 <td class="text-center align-middle">
                                     <a href="#" class="btn btn-primary btn-sm" data-toggle="dropdown" title="More" ><i class="fa-solid fa-ellipsis"></i></a>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="">
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'detail_rekam_medis' item.id %}">
                                             <i class="fa-solid fa-magnifying-glass text-primary"></i> 
                                             <span>Lihat Detail</span>
                                             
                                         </a>
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="">
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'edit_rekam_medis' item.id %}">
                                             <i class="fa-solid fa-pencil text-primary"></i>
                                             <span>Edit</span>
                                         </a>
@@ -155,4 +151,20 @@
     <!-- End Footer -->
 </div>
 <!-- End Page content -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function () {
+    console.log("Applying bootstrap-datepicker...");
+    $('.datepicker').datepicker({
+        format: 'mm-dd-yyyy',
+        autoclose: true,
+        todayHighlight: true,
+        orientation: 'bottom auto'
+    }).on('changeDate', function () {
+        $(this).closest('form').submit();  // submit otomatis
+    });
+});
+</script>
 {% endblock %}

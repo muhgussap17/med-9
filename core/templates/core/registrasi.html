@@ -23,7 +23,7 @@
                             {% if breadcrumbs %}
                                 {% for item in breadcrumbs %}
                                     {% if forloop.last %}
-                                        <li class="breadcrumb-item text-default active" aria-current="page">{{ item.title }}</li>
+                                        <li class="breadcrumb-item text-muted active" aria-current="page">{{ item.title }}</li>
                                     {% else %}
                                         <li class="breadcrumb-item">
                                             <a href="{{ item.url }}" class="text-default">{{ item.title }}</a>
@@ -122,7 +122,7 @@
                                             <span>Buat Rekam Medis</span>
                                         </a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'batalkan_registrasi' item.id %}">
+                                        <a href="#" class="dropdown-item d-flex align-items-center text-default swal-confirm"data-url="{% url 'batalkan_registrasi' item.id %}">
                                             <i class="fa-solid fa-ban text-danger"></i> 
                                             <span>Batalkan</span>
                                         </a>
@@ -169,16 +169,30 @@
 
 {% block scripts %}
 <script>
-$(document).ready(function () {
-    console.log("Applying bootstrap-datepicker...");
-    $('.datepicker').datepicker({
-        format: 'mm-dd-yyyy',
-        autoclose: true,
-        todayHighlight: true,
-        orientation: 'bottom auto'
-    }).on('changeDate', function () {
-        $(this).closest('form').submit();  // submit otomatis
+  $(document).ready(function () {
+    $('.sweet-confirm').on('click', function (e) {
+      e.preventDefault(); // stop langsung redirect
+
+      const url = $(this).data('url');
+      const title = $(this).data('title') || 'Konfirmasi';
+      const message = $(this).data('message') || 'Apakah kamu yakin ingin melanjutkan?';
+
+      swal({
+        title: title,
+        text: message,
+        type: 'question',
+        showCancelButton: true,
+        buttonsStyling: false,
+        confirmButtonClass: 'btn btn-danger',
+        cancelButtonClass: 'btn btn-secondary',
+        confirmButtonText: 'Ya, lanjutkan!',
+        cancelButtonText: 'Batal'
+      }).then(function (result) {
+        if (result.value) {
+          window.location.href = url;
+        }
+      });
     });
-});
+  });
 </script>
 {% endblock %}

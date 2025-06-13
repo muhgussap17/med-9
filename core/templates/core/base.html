@@ -26,6 +26,8 @@
     <link rel="stylesheet" href="{% static 'assets/vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendor/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/vendor/animate.css/animate.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/vendor/sweetalert2/dist/sweetalert2.min.css' %}">
     <!-- <link rel="stylesheet" href="{% static 'assets/vendor/quill/dist/quill.core.css' %}"> -->
 
 
@@ -49,11 +51,6 @@
 </head>
 
 <body class="g-sidenav-pinned">
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
     <!-- Sidenav -->
     <nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white" id="sidenav-main">
         <div class="scrollbar-inner">
@@ -112,26 +109,6 @@
                                             <span class="sidenav-normal"> ICD-10 </span>
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <span class="sidenav-normal"> Jenis Alergi </span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <span class="sidenav-normal"> Jenis Penyakit </span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <span class="sidenav-normal"> Obat </span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <span class="sidenav-normal"> Layanan/Tindakan </span>
-                                        </a>
-                                    </li>
                                 </ul>
                             </div>
                         </li>
@@ -187,7 +164,41 @@
         <!-- End Topnav -->
         {% block content %}
         {% endblock %}
+        <!-- Modal Perubahan -->
+        <div class="modal fade" id="modal-perubahan" tabindex="-1" role="dialog" aria-labelledby="modal-perubahan" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="modal-title-default">Log Perubahan Resume Medis</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="datatable-basic" class="table table-flush table-striped">                         
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="">Tanggal</th>
+                                    <th class="">User</th>
+                                    <th class="">Data Lama</th>
+                                    <th class="">Data Baru</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="align-middle"></td>                                
+                                    <td class="align-middle"></td>
+                                    <td class="align-middle text-wrap"></td>
+                                    <td class="align-middle text-wrap"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>                  
+                </div>
+            </div>
+        </div>
     </div>
+
     <!-- End Content -->
     <!-- Argon Scripts -->
     <!-- Core -->
@@ -214,8 +225,12 @@
     <script src="{% static 'assets/vendor/quill/dist/quill.min.js' %}"></script>
     <script src="{% static 'assets/vendor/dropzone/dist/min/dropzone.min.js' %}"></script>
     <script src="{% static 'assets/vendor/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/sweetalert2/dist/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
     <!-- Argon JS -->
     <script src="{% static 'assets/js/argon.js' %}"></script>
+    <script src="{% static 'assets/js/demo.min.js' %}"></script>
+
 
     {% block scripts %}
     {% endblock %}

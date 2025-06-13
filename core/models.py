@@ -1,10 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from datetime import date
-from myproject.middleware.current_user import get_current_user
-
-User = get_user_model()
 
 ########## Model TextChoice ##########
 # === Untuk Identitas Pasien ===
@@ -243,20 +240,12 @@ class RekamMedis(models.Model):
     non_medikamentosa = models.TextField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
     status_pulang = models.CharField(max_length=20, choices=StatusPulangChoices.choices, blank=True, null=True) # Tidak Wajib diisi
 
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rekammedis_created')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rekammedis_updated')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rekam_dibuat')
-    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rekam_diubah')
-
-    def save(self, *args, **kwargs):
-        user = get_current_user()
-        if user and not self.pk:  # baru dibuat
-            self.created_by = user
-        if user:
-            self.updated_by = user
-        super().save(*args, **kwargs)
-        
+    
     def __str__(self):
         return f"{self.registrasi.pasien.nama_lengkap} - {self.created_at.date()}"
 

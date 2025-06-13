@@ -36,74 +36,76 @@
                     </nav>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title h3 text-default mb-0">Pasien Hari Ini</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Sudah Terdaftar</h5>
+                                    <span class="h2 font-weight-bold mb-0">{{ total_terdaftar }}</span>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Belum Dilayani</h5>
+                                    <span class="h2 font-weight-bold mb-0">{{ belum_dilayani }}</span>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Sudah Dilayani</h5>
+                                    <span class="h2 font-weight-bold mb-0">{{ sudah_dilayani }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="col-12 col-md-4">
+                    <div class="card card-stats">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5 class="card-title text-uppercase text-muted mb-0">Belum Dilayani</h5>
+                                        <span class="h2 font-weight-bold mb-0">350,897</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card card-stats">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col">
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Belum Dilayani</h5>
+                                    <span class="h2 font-weight-bold mb-0">350,897</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card card-stats">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col">
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Sudah Dilayani</h5>
+                                    <span class="h2 font-weight-bold mb-0">350,897</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
         </div>
     </div>
 </div>
 <!-- End Header -->
 <!-- Page content -->
 <div class="container-fluid mt--6">
-    <!-- Row 1 - Statistik -->
-    <div class="row">
-        <!-- Col 1 -->
-        <div class="col-xl-8">
-            <div class="card bg">
-                <div class="card-header bg-transparent">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
-                            <h5 class="h3 mb-0">Jumlah Pasien</h5>
-                        </div>
-                        <div class="col">
-                            <ul class="nav nav-pills justify-content-end">
-                                <li class="nav-item mr-2 mr-md-0" data-toggle="chart" data-target="#chart-sales-dark" data-update='{"data":{"datasets":[{"data":[0, 20, 10, 30, 15, 40, 20, 60, 60]}]}}'>
-                                    <a href="#" class="nav-link py-2 px-3 active" data-toggle="tab">
-                                        <span class="d-none d-md-block">Bulan</span>
-                                        <span class="d-md-none">B</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-toggle="chart" data-target="#chart-sales-dark" data-update='{"data":{"datasets":[{"data":[0, 20, 5, 25, 10, 30, 15, 40, 40]}]}}'>
-                                    <a href="#" class="nav-link py-2 px-3" data-toggle="tab">
-                                        <span class="d-none d-md-block">Minggu</span>
-                                        <span class="d-md-none">M</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Chart -->
-                    <div class="chart">
-                        <!-- Chart wrapper -->
-                        <canvas id="chart-sales-dark" class="chart-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- End Col 1 -->
-        <!-- Col 2 -->
-        <div class="col-xl-4">
-            <div class="card">
-                <div class="card-header bg-transparent">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
-                            <h5 class="h3 mb-0">Total orders</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Chart -->
-                    <div class="chart">
-                        <canvas id="chart-bars" class="chart-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- End Col 2 -->
-    </div>
-    <!-- End Row 1 -->
-    <!-- Row 2 - Antrian Registrasi -->
+    <!-- Row 1 - Antrian Registrasi -->
     <div class="row">
         <div class="col">
             <div class="card">
@@ -116,19 +118,23 @@
                     <table id="datatable-basic" class="table table-flush table-striped">                         
                         <thead class="thead-light">
                             <tr>
-                                <th>No. Antri</th>
+                                <th style="width: 5%;" class="text-center">No. Antri</th>
                                 <th>Nama Pasien</th>
                                 <th>Waktu Konsul</th>
-                                <th>Status</th>
+                                <th class="w-10 text-center">Status</th>
+                                <th class="w-10 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in data_registrasi %}
                             <tr>
-                                <td>{{ item.no_antrian }}</td>
-                                <td>{{ item.pasien.nama_lengkap }}</td>
-                                <td>{{ item.tanggal }}</td>
-                                <td>
+                                <td class="text-center align-middle">{{ item.no_antrian }}</td>
+                                <td class="align-middle">{{ item.pasien.nama_lengkap }}</td>
+                                <td class="align-middle">
+                                    {{ item.tanggal|date:"d M Y" }}<br>
+                                    <small class="text-muted">{{ item.waktu|time:"H:i" }}</small>
+                                </td>
+                                <td class="text-center align-middle">
                                     {% if item.status == 'menunggu' %}
                                         <span class="badge badge-warning">Menunggu</span>
                                     {% elif item.status == 'selesai' %}
@@ -136,6 +142,20 @@
                                     {% elif item.status == 'batal' %}
                                         <span class="badge badge-danger">Batal</span>
                                     {% endif %}
+                                </td>
+                                <td class="text-center align-middle">
+                                    <a href="#" class="btn btn-primary btn-sm" data-toggle="dropdown" title="More" ><i class="fa-solid fa-ellipsis"></i></a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'buat_rekam_medis' item.id %}">
+                                            <i class="fa-solid fa-file-circle-plus text-primary"></i> 
+                                            <span>Buat Rekam Medis</span>
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="#" class="dropdown-item d-flex align-items-center text-default swal-confirm"data-url="{% url 'batalkan_registrasi' item.id %}">
+                                            <i class="fa-solid fa-ban text-danger"></i> 
+                                            <span>Batalkan</span>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -146,7 +166,8 @@
             </div>
         </div>
     </div>
-    <!-- End Row 2 -->
+    <!-- End Row 1 -->
+
     <!-- Footer -->
     <footer class="footer pt-0">
         <div class="row align-items-center justify-content-lg-between">

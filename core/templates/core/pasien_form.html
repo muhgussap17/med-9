@@ -1,7 +1,13 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Tambahkan Pasien{% endblock %}
+{% block title %}
+    {% if mode == "edit" %}
+        {{ pasien.nama_lengkap }} | Edit
+    {% else %}
+        Tambah Pasien
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 <!-- Header -->
@@ -17,7 +23,7 @@
                     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
                         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                             <li class="breadcrumb-item">
-                                <a href="{% url 'dashboard' %}"><i class="fas fa-home text-default"></i></a>
+                                <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home text-default"></i></a>
                             </li>
                             {% if breadcrumbs %}
                                 {% for item in breadcrumbs %}
@@ -40,19 +46,17 @@
     </div>
 </div>
 <!-- End Header -->
-
 <!-- Page content -->
 <div class="container-fluid mt--6">
     <!-- Form Tambah Pasien -->
     <div class="row">
-        <!-- Kolom Utama -->
         <div class="col-12 col-md-9">
             <div class="card">
                 <div class="card-body">
                     <form id="formPasien" method="POST" action="">
                         {% csrf_token %}
                         <div class="d-flex align-items-center text-center mt-3 mb-3">
-                            <h5 class="mr-3 my-0 font-weight-bold">DATA DIRI</h5>
+                            <h5 class="mr-3 my-0 font-weight-bold">DATA IDENTITAS</h5>
                             <div class="flex-grow-1 border-top"></div>
                         </div>
                         <!-- Jenis Pasien & No. Asuransi-->
@@ -61,25 +65,22 @@
                             <div class="col-12 col-md-4">
                                 <label class="form-control-label">Jenis Pasien <span class="text-danger">*</span></label>
                                 <div class="row mt-3 mx-1">
-                                    <div class="col-auto custom-control custom-radio align-items-center">
-                                        <input type="radio" name="jenis_pasien" id="umum" value="umum" class="custom-control-input" checked onchange="toggleAsuransiInput()">
-                                        <label class="custom-control-label" for="umum">Umum</label>
-                                    </div>
-                                    <div class="col-auto custom-control custom-radio align-items-center">
-                                        <input type="radio" name="jenis_pasien" id="bpjs" value="bpjs" class="custom-control-input" onchange="toggleAsuransiInput()">
-                                        <label class="custom-control-label" for="bpjs">BPJS</label>
-                                    </div>
-                                    <div class="col-auto custom-control custom-radio align-items-center">
-                                        <input type="radio" name="jenis_pasien" id="asuransi_lain" value="asuransi_lain" class="custom-control-input" onchange="toggleAsuransiInput()">
-                                        <label class="custom-control-label" for="asuransi_lain">Asuransi Lain</label>
-                                    </div>
+                                    {% for key, label in jenis_pasien_choices %}
+                                        <div class="col-auto custom-control custom-radio align-items-center">
+                                            <input type="radio" name="jenis_pasien" id="{{ key }}" value="{{ key }}"
+                                                class="custom-control-input"
+                                                {% if form.jenis_pasien.value == key %}checked{% endif %}
+                                                onchange="toggleAsuransiInput()">
+                                            <label class="custom-control-label" for="{{ key }}">{{ label }}</label>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                             <!-- No. Asuransi -->
                             <div class="col-12 col-md-8">
                                 <div class="form-group">
                                     <label for="no_asuransi" class="form-control-label">No. Asuransi <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="no_asuransi" name="no_asuransi" pattern="\d{30}" placeholder="Nomor Asuranasi" maxlength="30" disabled>
+                                    <input type="text" class="form-control" id="no_asuransi" name="no_asuransi" value="{{ form.no_asuransi.value|default:'' }}" pattern="\d{20}" placeholder="Nomor Asuranasi" maxlength="20" disabled>
                                 </div>
                             </div>
                         </div>
@@ -89,14 +90,14 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="nama_lengkap" class="form-control-label">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" placeholder="Nama Lengkap" required>
+                                    <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" value="{{ form.nama_lengkap.value|default:'' }}" placeholder="Masukkan nama lengkap" required>
                                 </div>
                             </div>
                             <!-- NIK -->
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="nik" class="form-control-label">NIK <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="nik" name="nik" maxlength="16" pattern="\d{16}" placeholder="Nomor Induk Kependudukan" maxlength="16" required>
+                                    <input type="text" class="form-control" id="nik" name="nik" value="{{ form.nik.value|default:'' }}" maxlength="16" pattern="\d{16}" placeholder="Masukkan NIK" maxlength="16" required>
                                 </div>
                             </div>
                         </div>
@@ -107,7 +108,7 @@
                                 <div class="form-group">
                                     <label for="tanggal_lahir" class="form-control-label">Tanggal Lahir <span class="text-danger">*</span></label>
                                     <div class="input-group input-group-merge">
-                                        <input type="text" class="form-control datepicker" id="tanggal_lahir" name="tanggal_lahir" placeholder="Tanggal Lahir (MM/DD/YYYY)" required autocomplete="off">
+                                        <input type="text" class="form-control datepicker" id="tanggal_lahir" name="tanggal_lahir" value="{{ form.tanggal_lahir.value|default:'' }}" placeholder="Tanggal Lahir (MM/DD/YYYY)" required autocomplete="off">
                                         <div class="input-group-append">
                                             <span class="input-group-text text-primary">
                                                 <i class="fa-solid fa-calendar-days"></i>
@@ -120,7 +121,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="jenis_kelamin" class="form-control-label">Jenis Kelamin <span class="text-danger">*</span></label>
-                                    <select class="form-control" id="jenis_kelamin" name="jenis_kelamin" required>
+                                    <select class="form-control" id="jenis_kelamin" name="jenis_kelamin"">
                                         <option value="" disabled selected hidden>Pilih</option>
                                         {% for key, label in jenis_kelamin_choices %}
                                         <option value="{{ key }}" {% if form.jenis_kelamin.value == key  %}selected{% endif %}>{{ label }}</option>
@@ -135,7 +136,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="status" class="form-control-label">Status <span class="text-danger">*</span></label>
-                                    <select class="form-control" id="status" name="status" required>
+                                    <select class="form-control" id="status" name="status">
                                         {% for key, label in status_choices %}
                                         <option value="{{ key }}" {% if form.status.value == key  %}selected{% endif %}>{{ label }}</option>
                                         {% endfor %}
@@ -147,7 +148,7 @@
                                 <div class="form-group">
                                     <label for="nomor_hp" class="form-control-label">Nomor telepon <span class="text-danger">*</span></label>
                                     <div class="input-group input-group-merge">
-                                        <input type="tel" class="form-control" pattern="08[0-9]{8,11}" id="nomor_hp" name="nomor_hp" maxlength="13" placeholder="Nomor Telepon">
+                                        <input type="tel" class="form-control" id="nomor_hp" name="nomor_hp" value="{{ form.nomor_hp.value|default:'' }}" pattern="08[0-9]{8,11}" placeholder="Nomor Telepon">
                                         <div class="input-group-append">
                                             <span class="input-group-text text-default">
                                                 <i class="fa-solid fa-phone-flip text-muted"></i>
@@ -163,12 +164,12 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="alamat" class="form-control-label">Alamat Lengkap <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="alamat" name="alamat" rows="2" placeholder="Alamat"></textarea>
+                                    <textarea class="form-control" id="alamat" name="alamat" rows="3" placeholder="Alamat">{{ form.alamat.value|default:'' }}</textarea>
                                 </div>
                             </div> 
-                        </div>
+                        </div>                        
                         <div class="d-flex align-items-center text-center mt-4 mb-3">
-                            <h5 class="mr-3 my-0 font-weight-bold">SOSIAL</h5>
+                            <h5 class="mr-3 my-0 font-weight-bold">DATA SOSIAL</h5>
                             <div class="flex-grow-1 border-top"></div>
                         </div>
                         <!-- Agama % Pendidikan-->
@@ -185,7 +186,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <!-- Pendidikan --> 
+                            <!-- Pendidikan -->
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="pendidikan" class="form-control-label">Pendidikan</label>
@@ -205,18 +206,10 @@
                                 <div class="form-group">
                                     <label for="pekerjaan" class="form-control-label">Pekerjaan</label>
                                     <select class="form-control" id="pekerjaan" name="pekerjaan">
-                                         <option value="" disabled selected hidden>Pilih</option>
-                                         <option value="belum_kerja">Belum Bekerja</option>
-                                         <option value="pelajar_mahasiswa">Pelajar/Mahasiswa</option>
-                                         <option value="ibu_rumah_tangga">Mengurus Rumah Tangga</option>
-                                         <option value="guru">Guru</option>
-                                         <option value="pensiunan">Pensiunan</option>
-                                         <option value="pns">PNS</option>
-                                         <option value="tni_polri">TNI/Polri</option>
-                                         <option value="karyawan_swasta">Karyawan Swasta</option>
-                                         <option value="karyawan_bumn">Karyawan BUMN/BUMD</option>
-                                         <option value="pengusaha">Pengusaha</option>
-                                         <option value="lainnya">Lainnya</option>
+                                        <option value="" disabled selected hidden>Pilih</option>
+                                        {% for key, label in pekerjaan_choices %}
+                                        <option value="{{ key }}" {% if form.pekerjaan.value == key  %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
                                      </select>
                                 </div>
                             </div>
@@ -226,10 +219,9 @@
                                     <label for="status_pernikahan" class="form-control-label">Status Pernikahan</label>
                                     <select class="form-control" id="status_pernikahan" name="status_pernikahan">
                                         <option value="" disabled selected hidden>Pilih</option>
-                                        <option value="belum_nikah">Belum Nikah</option>
-                                        <option value="nikah">Nikah</option>
-                                        <option value="cerai_hidup">Cerai Hidup</option>
-                                        <option value="cerai_mati">Cerai Mati</option>
+                                        {% for key, label in status_pernikahan_choices %}
+                                        <option value="{{ key }}" {% if form.status_pernikahan.value == key  %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             </div>
@@ -271,13 +263,19 @@
         </div>
         <!-- Kolom Button -->
         <div class="col-12 col-md-3">
-            <div class="position-sticky" style="top: 1rem;">
+            <div class="position-sticky" style="top: 1rem;">                
                 <div class="card">
                     <div class="card-body">
                         <!-- Tombol Simpan & Batal -->
                         <div class="row">
                             <div class="col-12">
-                                <button type="submit" form="formPasien" class="btn btn-primary btn-block">Simpan</button>
+                                <button type="submit" form="formPasien" class="btn btn-primary btn-block">
+                                    {% if mode == "edit" %}
+                                        Simpan Perubahan
+                                    {% else %}
+                                        Tambah Pasien
+                                    {% endif %}
+                                </button>
                             </div>
                         </div>
                         <div class="row mt-2">
