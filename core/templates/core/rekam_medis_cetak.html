@@ -41,8 +41,8 @@
 <body>
 
     <div class="text-center">
-        <p><strong>PRAKTIK DOKTER MANDIRI</strong><br>
-        JL. Nama Jalan, Kota, Telp: 08xxxxxxx</p>
+        <p><strong>PRAKTIK DOKTER WISNU</strong><br>
+        JL. Juanda, Kota Samarinda, Telp: 08xxxxxxx</p>
         <hr>
         <p class="judul-surat">SURAT RESUME MEDIS</p>
         <p>Nomor: ____/RSM/{{ rekam.created_at|date:"Y" }}</p>
@@ -118,8 +118,8 @@
     </div>
 
     <div class="ttd">
-        <p>Cirebon, {{ rekam.created_at|date:"d F Y" }}<br>
-        Dokter Pemeriksa,</p><br><br><br>
+        <p>Samarinda, {{ rekam.created_at|date:"d F Y" }}<br>
+        {{ rekam.created_by.get_full_name|default:"Dokter Pemeriksa" }},</p><br><br><br>
         <p><strong>__________________________</strong></p>
     </div>
 

@@ -46,7 +46,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('dashboard')
+            return redirect('login')
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
@@ -238,7 +238,7 @@ def buat_registrasi_pasien_auto(request, pasien_id): # UDAH FIX
     
     registrasi = Registrasi.objects.create(pasien=pasien)
     registrasi.save()
-    messages.success(request, f"Registrasi untuk pasien {pasien.nama_lengkap} berhasil dibuat.")
+    messages.success(request, f"Registrasi {pasien.nama_lengkap} berhasil dibuat.")
     return redirect('daftar_pasien')
 
 @login_required
@@ -246,7 +246,7 @@ def nonaktifkan_pasien(request, pk): # UDAH FIX
     pasien = get_object_or_404(Pasien, pk=pk)
     pasien.status = StatusPasienChoices.NONAKTIF
     pasien.save()
-    messages.success(request, "Pasien telah dinonaktifkan")
+    messages.warning(request, "Pasien telah dinonaktifkan")
     return redirect('daftar_pasien')
 
 
@@ -273,12 +273,10 @@ def daftar_registrasi(request): # UDAH FIX
 
     parsed_date = None
     if tanggal_filter:
-        for fmt in ['%Y-%m-%d', '%m/%d/%Y']:  # tambahkan format ini
-            try:
-                parsed_date = datetime.strptime(tanggal_filter, fmt).date()
-                break
-            except ValueError:
-                continue
+        try:
+            parsed_date = datetime.strptime(tanggal_filter, '%m/%d/%Y').date()
+        except ValueError:
+            parsed_date = None
     else:
         parsed_date = date.today()
 
@@ -286,6 +284,10 @@ def daftar_registrasi(request): # UDAH FIX
         queryset = queryset.filter(tanggal=parsed_date)
     else:
         tanggal_filter = None
+    if status_filter in StatusRegistrasiChoices.values:
+        queryset = queryset.filter(status=status_filter)
+    else:
+        status_filter = None
 
     breadcrumbs = [
         {'title': 'Registrasi', 'url': '/registrasi/'},
@@ -306,7 +308,7 @@ def batalkan_registrasi(request, pk): # UDAH FIX
     registrasi = get_object_or_404(Registrasi, pk=pk)
     registrasi.status = StatusRegistrasiChoices.BATAL
     registrasi.save()
-    messages.success(request, "Registrasi dibatalkan.")
+    messages.warning(request, "Registrasi dibatalkan.")
 
     return redirect('daftar_registrasi')
 
@@ -325,12 +327,10 @@ def daftar_rekam_medis(request):
 
     parsed_date = None
     if tanggal_filter:
-        for fmt in ['%Y-%m-%d', '%m/%d/%Y']:  # tambahkan format ini
-            try:
-                parsed_date = datetime.strptime(tanggal_filter, fmt).date()
-                break
-            except ValueError:
-                continue
+        try:
+            parsed_date = datetime.strptime(tanggal_filter, '%m/%d/%Y').date()
+        except ValueError:
+            parsed_date = None
     else:
         parsed_date = date.today()
 

@@ -6,6 +6,5 @@ __pycache__/
 *.pyc
 settings.py/
 db.sqlite3
-/static/
 
 /contoh-argon/

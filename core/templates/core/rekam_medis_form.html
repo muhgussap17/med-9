@@ -117,7 +117,7 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label for="keluhan_utama" class="form-control-label">Keluhan Utama <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="keluhan_utama" name="keluhan_utama" value="{{ form.keluhan_utama.value|default:'' }}" placeholder="Masukkan keluhan">
+                                                    <input type="text" class="form-control" id="keluhan_utama" name="keluhan_utama" value="{{ form.keluhan_utama.value|default:'' }}" placeholder="Masukkan keluhan" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -264,7 +264,7 @@
                                                 <div class="form-group">
                                                     <label for="kode_diagnosis" class="form-control-label">ICD-10 <span class="text-danger">*</span></label>
                                                     <!-- <input type="text" class="form-control" id="kode_diagnosis" name="kode_diagnosis" placeholder="Kode diagnosis"> -->
-                                                    <select class="form-control" id="kode_diagnosis" name="kode_diagnosis">
+                                                    <select class="form-control" id="kode_diagnosis" name="kode_diagnosis" required>
                                                         <option value="" disabled selected hidden>Pilih</option>
                                                         {% for icd in icd_list %}
                                                             <option value="{{ icd.id }}"
@@ -282,14 +282,14 @@
                                             <div class="col-12 col-md-6">
                                                 <div class="form-group">
                                                     <label for="diagnosis" class="form-control-label">Diagnosis <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="diagnosis" name="diagnosis" value="{{ form.diagnosis.value|default:'' }}" placeholder="Opsional jika kode tidak ditemukan">
+                                                    <input type="text" class="form-control" id="diagnosis" name="diagnosis" value="{{ form.diagnosis.value|default:'' }}" placeholder="Opsional jika kode tidak ditemukan" required>
                                                 </div>
                                             </div>
                                             <!-- Prognosis -->
                                             <div class="col-12 col-md-6">
                                                 <div class="form-group">
                                                     <label for="prognosis" class="form-control-label">Prognosis <span class="text-danger">*</span></label>
-                                                    <select class="form-control" id="prognosis" name="prognosis">
+                                                    <select class="form-control" id="prognosis" name="prognosis" required>
                                                         <option value="" disabled selected hidden>Pilih</option>
                                                         {% for key, label in prognosis_choices %}
                                                             <option value="{{ key }}" {% if form.prognosis.value == key %}selected{% endif %}>{{ label }}</option>

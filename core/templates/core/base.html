@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no">
     <title>{% block title %}{% endblock %}</title>
     <!-- Favicon -->
-    <link rel="icon" href="" type="image/png">
+    <link rel="icon" href="{% static 'assets/img/Group.svg' %}" type="image/svg">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,9 +55,9 @@
     <nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white" id="sidenav-main">
         <div class="scrollbar-inner">
             <!-- Brand -->
-            <div class="sidenav-header  d-flex  align-items-center">
+            <div class="sidenav-header d-flex justify-content-center align-items-center">
                 <a class="navbar-brand" href="javascript:void(0)">
-                  <img src="{% static 'assets/img/brand/blue.png' %}" class="navbar-brand-img" alt="">
+                  <img src="{% static 'assets/img/blue.svg' %}" class="navbar-brand-img" alt="" style="max-height: 40px;">
                 </a>
             </div>
             <!-- End Brand -->
@@ -162,9 +162,10 @@
             </div>
         </nav>
         <!-- End Topnav -->
+
         {% block content %}
         {% endblock %}
-        <!-- Modal Perubahan -->
+
         <div class="modal fade" id="modal-perubahan" tabindex="-1" role="dialog" aria-labelledby="modal-perubahan" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
@@ -198,8 +199,16 @@
             </div>
         </div>
     </div>
-
     <!-- End Content -->
+    
+    {% include 'partials/toast.html' %}
+
+    <script>
+    $(document).ready(function () {
+        $('.toast').toast('show');
+    });
+    </script>
+
     <!-- Argon Scripts -->
     <!-- Core -->
     <script src="{% static 'assets/vendor/jquery/dist/jquery.min.js' %}"></script>
@@ -230,7 +239,6 @@
     <!-- Argon JS -->
     <script src="{% static 'assets/js/argon.js' %}"></script>
     <script src="{% static 'assets/js/demo.min.js' %}"></script>
-
 
     {% block scripts %}
     {% endblock %}
