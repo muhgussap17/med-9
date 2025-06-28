@@ -138,8 +138,7 @@ STATICFILES_DIRS = [
 # AUTHENTICATION SETTINGS
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
-    'django.contrib.auth.bals'
-    'ckends.ModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 LOGIN_URL = 'login'
