@@ -31,7 +31,7 @@
                         <div class="form-group mb-3">
                             <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="ni ni-single-02"></i></span>
+                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                                 </div>
                                 <input type="text" name="username" class="form-control" placeholder="Username" required autofocus>
                             </div>
@@ -41,7 +41,7 @@
                         <div class="form-group mb-3">
                             <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="ni ni-email-83"></i></span>
+                                    <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                                 </div>
                                 <input type="email" name="email" class="form-control" placeholder="Email" required>
                             </div>
@@ -51,7 +51,7 @@
                         <div class="form-group mb-3">
                             <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="ni ni-lock-circle-open"></i></span>
+                                    <span class="input-group-text"><i class="fa-solid fa-unlock"></i></span>
                                 </div>
                                 <input type="password" name="password1" class="form-control" placeholder="Password" required>
                             </div>
@@ -61,7 +61,7 @@
                         <div class="form-group mb-0">
                             <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="ni ni-lock-circle-open"></i></span>
+                                    <span class="input-group-text"><i class="fa-solid fa-unlock"></i></span>
                                 </div>
                                 <input type="password" name="password2" class="form-control" placeholder="Confirm password" required>
                             </div>
@@ -80,10 +80,10 @@
                     </div>
 
                     <div class="text-center mb-4">
-                        <button type="submit" class="btn btn-secondary my-0 w-100 d-flex align-items-center justify-content-center">
+                        <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-secondary my-0 w-100 d-flex align-items-center justify-content-center">
                             <img src="{% static 'assets/img/icons/common/google.svg' %}" alt="Google" class="mr-3" style="height: 20px;">
                             <span class="text-default">Sign up with Google</span>
-                        </button>
+                        </a>
                     </div>
 
                     <div class="row">

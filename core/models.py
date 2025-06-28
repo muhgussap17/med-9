@@ -1,7 +1,9 @@
 from django.db import models
+# from django_ckeditor_5.fields import CKEditor5Field
 from django.utils import timezone
 from django.contrib.auth.models import User
 from datetime import date
+
 
 ########## Model TextChoice ##########
 # === Untuk Identitas Pasien ===
@@ -231,14 +233,18 @@ class RekamMedis(models.Model):
     berat_badan = models.PositiveIntegerField(blank=True, null=True)          # Format: kg
 
     # --- Assesment ---
-    kode_diagnosis = models.ForeignKey(ICD10, on_delete=models.CASCADE, blank=True, null=True) # Wajib diisi
-    diagnosis = models.CharField(max_length=255, blank=True, null=True) # Wajib diisi
+    # kode_diagnosis = models.ForeignKey(ICD10, on_delete=models.CASCADE, blank=True, null=True) # Wajib diisi
+    kode_diagnosis = models.CharField(max_length=255, blank=True, null=True)
+    diagnosis_deskripsi = models.CharField(max_length=255, blank=True, null=True) # Wajib diisi
     prognosis = models.CharField(max_length=10, choices=PrognosisChoices.choices, blank=True, null=True) # Wajib diisi
 
     # --- Plan --- (Jika dibutuhkan aja)
     medikamentosa = models.TextField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
     non_medikamentosa = models.TextField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
     status_pulang = models.CharField(max_length=20, choices=StatusPulangChoices.choices, blank=True, null=True) # Tidak Wajib diisi
+
+    # -- Plan Versi Kedua --- 
+    text = models.TextField(max_length=255, blank=True, null=True) # Tidak Wajib diisi
 
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rekammedis_created')
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rekammedis_updated')

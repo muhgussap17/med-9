@@ -12,7 +12,14 @@
                 <div class="card-body px-lg-5 py-lg-5">
                     {% if form.errors %}
                         <div class="alert alert-danger" role="alert">
-                            Email atau password salah. Silakan coba lagi.
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
                         </div>
                     {% endif %}
 
@@ -25,7 +32,7 @@
                             <!-- <div class="input-group input-group-merge input-group-alternative"> -->
                             <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="ni ni-single-02"></i></span>
+                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                                 </div>
                                 <input type="text" name="username" class="form-control" placeholder="Username" required="true" autofocus>
                             </div>
@@ -35,7 +42,7 @@
                         <div class="form-group mb-2">
                             <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="ni ni-lock-circle-open"></i></span>
+                                    <span class="input-group-text"><i class="fa-solid fa-unlock"></i></span>
                                 </div>
                                 <input type="password" name="password" class="form-control" placeholder="Password" required>
                             </div>
@@ -58,10 +65,10 @@
                     </div>
 
                     <div class="text-center mb-4">
-                        <button type="submit" class="btn btn-secondary my-0 w-100 d-flex align-items-center justify-content-center">
+                        <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-secondary my-0 w-100 d-flex align-items-center justify-content-center">
                             <img src="{% static 'assets/img/icons/common/google.svg' %}" alt="Google" class="mr-3" style="height: 20px;">
                             <span class="text-default">Sign in with Google</span>
-                        </button>
+                        </a>
                     </div>
 
                     <div class="row">
@@ -79,4 +86,11 @@
 </div>
 <!-- End Page content -->
 {% endblock %}
-                
+
+{% block extra_js %}
+<script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+</script>
+{% endblock %}

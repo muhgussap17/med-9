@@ -9,6 +9,16 @@
     {% endif %}
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/vendor/quill/dist/quill.core.css' %}">
+<link rel="stylesheet" href="{% static 'assets/vendor/quill/dist/quill.snow.css' %}">
+<link rel="stylesheet" href="{% static 'assets/vendor/quill/dist/quill.bubble.css' %}">
+
+<!-- Fix Style -->
+<link rel="stylesheet" href="{% static 'assets/css/select2-argon-fix.css' %}">
+
+{% endblock %}
+
 {% block content %}
 <!-- Header -->
 <div class="header pb-6">
@@ -263,15 +273,8 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label for="kode_diagnosis" class="form-control-label">ICD-10 <span class="text-danger">*</span></label>
-                                                    <!-- <input type="text" class="form-control" id="kode_diagnosis" name="kode_diagnosis" placeholder="Kode diagnosis"> -->
-                                                    <select class="form-control" id="kode_diagnosis" name="kode_diagnosis" required>
-                                                        <option value="" disabled selected hidden>Pilih</option>
-                                                        {% for icd in icd_list %}
-                                                            <option value="{{ icd.id }}"
-                                                                {% if form.kode_diagnosis.value|stringformat:"s" == icd.id|stringformat:"s" %}selected{% endif %}>
-                                                                {{ icd.kode }} - {{ icd.deskripsi }}
-                                                            </option>
-                                                        {% endfor %}
+                                                    <select id="kode_diagnosis" name="kode_diagnosis" class="form-control" data-toggle="select" required>
+                                                        <option selected value="{{ form.instance.kode_diagnosis }}">{{ form.instance.kode_diagnosis }}</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -281,15 +284,15 @@
                                         <div class="row">
                                             <div class="col-12 col-md-6">
                                                 <div class="form-group">
-                                                    <label for="diagnosis" class="form-control-label">Diagnosis <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="diagnosis" name="diagnosis" value="{{ form.diagnosis.value|default:'' }}" placeholder="Opsional jika kode tidak ditemukan" required>
+                                                    <label for="diagnosis_deskripsi" class="form-control-label">Diagnosis <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="diagnosis_deskripsi" name="diagnosis_deskripsi" value="{{ form.diagnosis_deskripsi.value|default:'' }}" placeholder="Opsional jika kode tidak ditemukan" required>
                                                 </div>
                                             </div>
                                             <!-- Prognosis -->
                                             <div class="col-12 col-md-6">
                                                 <div class="form-group">
                                                     <label for="prognosis" class="form-control-label">Prognosis <span class="text-danger">*</span></label>
-                                                    <select class="form-control" id="prognosis" name="prognosis" required>
+                                                    <select class="form-control" id="prognosis" name="prognosis" required">
                                                         <option value="" disabled selected hidden>Pilih</option>
                                                         {% for key, label in prognosis_choices %}
                                                             <option value="{{ key }}" {% if form.prognosis.value == key %}selected{% endif %}>{{ label }}</option>
@@ -335,6 +338,20 @@
                                     </div>
                                 </div>
                                 <!-- END PLAN -->
+
+                                <!-- PLAN 2-->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0 text-muted">Catatan Tambahan</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <label for="text" class="form-control-label">Catatan Tambahan</label>
+                                        <!-- saya pake CkEditor Argon aja pak, tutor dari bapak disaya ga ngerender ckeditornya -->
+                                        <div id="quill-text" data-quill-placeholder="Tambahkan Catatan">{{ forms.text.value|safe }}</div>
+                                        <input type="hidden" name="text" id="text" value="{{ form.text.value|default:'' }}">
+                                    </div>
+                                </div>
+                                <!-- END PLAN 2 -->
                             </form>
                         </div>
                         <!-- Kolom Button -->
@@ -391,7 +408,7 @@
                                         <td class="align-middle">{{ item.keluhan_utama|default:'' }}</td>
                                         <td class="align-middle text-wrap">
                                             {% if item.kode_diagnosis %}{{ item.kode_diagnosis }}
-                                            {% elif item.diagnosis %}{{ item.diagnosis }}
+                                            {% elif item.diagnosis %}{{ item.diagnosis_deskripsi }}
                                             {% else %}<em class="text-muted">Belum ada</em>{% endif %}
                                         </td>
                                         <td class="align-middle text-wrap" style="max-width: 250px; white-space: normal;">
@@ -416,50 +433,84 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer pt-0">
-        <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6">
-                <div class="copyright text-center text-lg-left text-muted">
-                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">About Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">Blog</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">License</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </footer>
+    {% include 'partials/footer.html' %}
+    <!-- End Footer -->
 </div>
 <!-- End Page content -->
 {% endblock %}
 
-{% block scripts %}
-<script>
-function handleTabClick(button) {
-  // Hapus 'active' dari semua tombol tab
-  const allTabs = document.querySelectorAll('.nav-link[data-tab]');
-  allTabs.forEach(btn => btn.classList.remove('active'));
+{% block extra_js %}
+    <script src="{% static 'assets/vendor/quill/dist/quill.min.js' %}"></script>
 
-  // Tambahkan 'active' ke tombol yang diklik
-  button.classList.add('active');
+    <script>
+        function handleTabClick(button) {
+        // Hapus 'active' dari semua tombol tab
+        const allTabs = document.querySelectorAll('.nav-link[data-tab]');
+        allTabs.forEach(btn => btn.classList.remove('active'));
 
-  // Sembunyikan semua tab content
-  const allContents = document.querySelectorAll('.tab-pane-content');
-  allContents.forEach(content => content.classList.add('d-none'));
+        // Tambahkan 'active' ke tombol yang diklik
+        button.classList.add('active');
 
-  // Tampilkan konten tab sesuai tombol
-  const target = button.getAttribute('data-tab');
-  const contentToShow = document.getElementById('tab-' + target);
-  if (contentToShow) contentToShow.classList.remove('d-none');
-}
-</script>
+        // Sembunyikan semua tab content
+        const allContents = document.querySelectorAll('.tab-pane-content');
+        allContents.forEach(content => content.classList.add('d-none'));
+
+        // Tampilkan konten tab sesuai tombol
+        const target = button.getAttribute('data-tab');
+        const contentToShow = document.getElementById('tab-' + target);
+        if (contentToShow) contentToShow.classList.remove('d-none');
+        }
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById('formRekam'); // ✅ Ini bener
+            const hiddenInput = document.getElementById('text');
+
+            // Safety check
+            if (!form || !hiddenInput) {
+            console.error("Form atau hidden input tidak ditemukan.");
+            return;
+            }
+
+            const quill = new Quill('#quill-text', {
+            theme: 'snow',
+            placeholder: 'Tambahkan Catatan',
+            });
+
+            // Inisialisasi isi editor dari input hidden (kalau ada)
+            if (hiddenInput.value) {
+            quill.root.innerHTML = hiddenInput.value;
+            }
+
+            // Sync isi Quill ke input hidden saat submit
+            form.addEventListener('submit', function () {
+            hiddenInput.value = quill.root.innerHTML;
+            });
+        });
+    </script>
+
+    <script>
+    $(document).ready(function () {
+        $('#kode_diagnosis').select2({
+            placeholder: 'Cari kode diagnosis ICD-11...',
+            ajax: {
+                url: '/ajax/icd-search/',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            }
+        });
+    });
+    </script>
 {% endblock %}

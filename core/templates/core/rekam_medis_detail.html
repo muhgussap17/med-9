@@ -1,7 +1,11 @@
 {% extends "core/base.html" %}
 {% load static %}
+{% load hashid_tags %}
 
 {% block title %}{{ pasien.nama_lengkap }} | Detail{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
 
 {% block content %}
 <!-- Header -->
@@ -166,18 +170,19 @@
                         <!-- ICD-10 -->
                         <div class="col-12 col-md-4">
                             <label class="form-control-label">ICD-10</label>
-                            <p>
+                            <p>{{ rekam.kode_diagnosis|default:"-" }}</p>
+                            <!-- <p>
                                 {% if rekam.kode_diagnosis %}
-                                    {{ rekam.kode_diagnosis.kode }} - {{ rekam.kode_diagnosis.deskripsi }}
+                                    {{ rekam.kode_diagnosis.kode }}
                                 {% else %}
                                     <em class="text-muted">-</em>
                                 {% endif %}
-                            </p>                        
+                            </p> -->
                         </div>
                         <!-- Diagnosis -->
                         <div class="col-12 col-md-4">
                             <label class="form-control-label">Diagnosis</label>
-                            <p>{{ rekam.diagnosis|default:"-" }}</p>
+                            <p>{{ rekam.diagnosis_deskripsi|default:"-" }}</p>
                         </div>
                         <!-- Prognosis -->
                         <div class="col-12 col-md-4">
@@ -199,15 +204,15 @@
                     <div class="row">
                         <div class="col-12 col-md-4">
                             <label class="form-control-label">Medikamentosa (Terapi Obat)</label>
-                            <p>-</p>
+                            <p>{{ rekam.medikamentosa|default:"-" }}</p>
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-control-label">Non-Medikamentosa (Terapi Tanpa Obat)</label>
-                            <p>-</p>
+                            <p>{{ rekam.non_medikamentosa|default:"-" }}</p>
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-control-label">Status Pulang</label>
-                            <p>-</p>
+                            <p>{{ rekam.get_status_pulang_display|default:"-" }}</p>
                         </div>
                     </div>
                 </div>
@@ -219,24 +224,19 @@
             <div class="position-sticky" style="top: 1rem;">
                 <div class="card">
                     <div class="card-header">
-                        <!-- Tombol Edit & Kembali -->
+                        <!-- Tombol Edit & Cetak -->
                         <div class="row">
                             <div class="col-12">
-                                <a href="{% url 'edit_rekam_medis' rekam.id %}" class="btn btn-primary btn-block">Edit Resume Medis</a>                                          
+                                <a href="{% url 'edit_rekam_medis' rekam.id|encode_hash %}" class="btn btn-primary btn-block">Edit Resume Medis</a>                                          
                             </div>
                         </div>
-                        <!-- <div class="row mt-2">
-                            <div class="col-12">
-                                <a href="{% url 'daftar_rekam_medis' %}" class="btn btn-outline-primary btn-block">Kembali</a>                                          
-                            </div>
-                        </div> -->
                         <div class="row mt-2">
                             <div class="col-12">
-                                <a href="{% url 'resume_medis' rekam.id %}" class="btn btn-outline-primary btn-block">Cetak</a>                                          
+                                <a href="{% url 'resume_medis' rekam.id|encode_hash %}" class="btn btn-outline-primary btn-block">Cetak</a>                                          
                             </div>
                         </div>
                     </div>
-                    <!-- Buat kondisi bagian card body ini muncul jika benar-benar mengalami perubahan -->
+                    <!-- Tampilkan Card Body Jika Mengalami Perubahan Data -->
                     {% if rekam.created_at|date:"Y-m-d H:i" != rekam.updated_at|date:"Y-m-d H:i" %}
                     <div class="card-body">     
                         <div class="row">
@@ -273,32 +273,11 @@
     <!-- End Main Row -->
 
     <!-- Footer -->
-    <footer class="footer pt-0">
-        <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6">
-                <div class="copyright text-center text-lg-left text-muted">
-                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">About Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">Blog</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">License</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </footer>
+    {% include 'partials/footer.html' %}
     <!-- End Footer -->
 </div>
 <!-- End Page content -->
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 {% endblock %}

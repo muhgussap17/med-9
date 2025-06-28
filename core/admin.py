@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.contrib.admin import RelatedOnlyFieldListFilter
 from .models import *
-from django.urls import reverse
 
 ########## Admin untuk Rekam Medis dengan inlines ##########
 @admin.register(RekamMedis)
@@ -15,7 +13,10 @@ class RekamMedisAdmin(admin.ModelAdmin):
     list_filter = ['created_at', 'created_by']
     search_fields = ('registrasi__pasien__nama_lengkap', 'keluhan_utama', 'diagnosis')
     readonly_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
-    autocomplete_fields = ('registrasi', 'kode_diagnosis')
+    autocomplete_fields = (
+        'registrasi',
+        # 'kode_diagnosis'
+        )
 
     fieldsets = (
         ('📌 Informasi Umum', {
@@ -39,7 +40,7 @@ class RekamMedisAdmin(admin.ModelAdmin):
         ('📋 Assessment', {
             'fields': (
                 'kode_diagnosis',
-                'diagnosis',
+                'diagnosis_deskripsi',
                 'prognosis',
             ),
         }),
@@ -48,6 +49,7 @@ class RekamMedisAdmin(admin.ModelAdmin):
                 'medikamentosa',
                 'non_medikamentosa',
                 'status_pulang',
+                'text',
             ),
         }),
         ('🕓 Metadata', {

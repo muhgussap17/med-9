@@ -1,7 +1,11 @@
 {% extends "core/base.html" %}
 {% load static %}
+{% load hashid_tags %}
 
 {% block title %}Registrasi{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
 
 {% block content %}
 <!-- Header -->
@@ -117,12 +121,12 @@
                                 <td class="text-center align-middle">
                                     <a href="#" class="btn btn-primary btn-sm" data-toggle="dropdown" title="More" ><i class="fa-solid fa-ellipsis"></i></a>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'buat_rekam_medis' item.id %}">
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'buat_rekam_medis' item.id|encode_hash %}">
                                             <i class="fa-solid fa-file-circle-plus text-primary"></i> 
                                             <span>Buat Rekam Medis</span>
                                         </a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'batalkan_registrasi' item.id %}">
+                                        <a class="dropdown-item d-flex align-items-center text-default" href="{% url 'batalkan_registrasi' item.id|encode_hash %}">
                                             <i class="fa-solid fa-ban text-danger"></i> 
                                             <span>Batalkan</span>
                                         </a>
@@ -140,45 +144,24 @@
     <!-- End Main Row -->
 
     <!-- Footer -->
-    <footer class="footer pt-0">
-        <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6">
-                <div class="copyright text-center text-lg-left text-muted">
-                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">About Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">Blog</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">License</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </footer>
+    {% include 'partials/footer.html' %}
     <!-- End Footer -->
 </div>
 <!-- End Page content -->
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <script>
-$(document).ready(function () {
-    console.log("Applying bootstrap-datepicker...");
-    $('.datepicker').datepicker({
-        format: 'mm-dd-yyyy',
-        autoclose: true,
-        todayHighlight: true,
-        orientation: 'bottom auto'
-    }).on('changeDate', function () {
-        $(this).closest('form').submit();  // submit otomatis
+    $(document).ready(function () {
+        console.log("Applying bootstrap-datepicker...");
+        $('.datepicker').datepicker({
+            format: 'mm-dd-yyyy',
+            autoclose: true,
+            todayHighlight: true,
+            orientation: 'bottom auto'
+        }).on('changeDate', function () {
+            $(this).closest('form').submit();  // submit otomatis
+        });
     });
-});
 </script>
 {% endblock %}

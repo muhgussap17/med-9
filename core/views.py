@@ -1,14 +1,25 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout
-from django.contrib import messages
+from .utils.hashid import decode_hash
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.utils.timezone import now
+from django.views.decorators.cache import never_cache
 from datetime import date, timedelta, datetime
 
 from .models import *
 from .forms import * # type: ignore
 
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.views.decorators.csrf import csrf_exempt
+from core.utils.who_api import search_icd
+
+def icd_search(request):
+    query = request.GET.get('q', '')
+    results = search_icd(query)
+    return JsonResponse(results, safe=False)
+    
 def get_pasien_choices_context():
     return {
         'jenis_pasien_choices': JenisPasienChoices.choices,
@@ -29,13 +40,19 @@ def get_rekam_medis_choices_context():
         'status_pulang_choices': StatusPulangChoices.choices,
     }
 
+@never_cache
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             return redirect('dashboard')
+        else:
+            messages.error(request, "Login gagal. Periksa kembali username dan password Anda.")
     else:
         form = AuthenticationForm()
     return render(request, 'registration/login.html', {'form': form})
@@ -45,20 +62,39 @@ def register_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return redirect('login')
+            raw_password = form.cleaned_data.get('password1')
+            # Pakai authenticate agar user.backend otomatis ter-set
+            authenticated_user = authenticate(username=user.username, password=raw_password)
+            if authenticated_user is not None:
+                login(request, authenticated_user)
+                return redirect('login')  # ganti ke dashboard kalau perlu
+            else:
+                messages.error(request, "Login otomatis gagal setelah registrasi.")
+        else:
+            messages.error(request, "Registrasi gagal. Periksa kembali form yang Anda isi.")
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
 
 def logout_view(request):
     logout(request)
+    request.session.flush()
     return redirect('login')
 
+@never_cache
 @login_required
 def dashboard(request):
     today = date.today()
-    queryset = Registrasi.objects.select_related('pasien').order_by('-waktu')
+
+    status_filter = request.GET.get('status') or StatusRegistrasiChoices.MENUNGGU
+    tanggal_filter = request.GET.get("tanggal") or today
+
+    queryset = (
+        Registrasi.objects
+        .select_related('pasien')
+        .filter(status=status_filter, tanggal=tanggal_filter)
+        .order_by('-waktu')
+    )
 
     total_terdaftar = Registrasi.objects.filter(tanggal=today).count()
     belum_dilayani = Registrasi.objects.filter(
@@ -69,17 +105,6 @@ def dashboard(request):
         status=StatusRegistrasiChoices.SELESAI,
         tanggal=today
     ).count()
-
-    status_filter = request.GET.get('status')
-    tanggal_filter = request.GET.get("tanggal")
-
-
-    status_filter = StatusRegistrasiChoices.MENUNGGU
-
-    tanggal_filter = today
-
-    queryset = queryset.filter(status=status_filter)
-    queryset = queryset.filter(tanggal=today)
     
     context = {
         'data_registrasi': queryset,
@@ -99,6 +124,7 @@ def dashboard(request):
 ################################################################################################################################################################################
 ################################################################################# FITUR PASIEN #################################################################################
 ################################################################################################################################################################################
+@never_cache
 @login_required
 def daftar_pasien(request): # UDAH FIX
     pasien_list = Pasien.objects.all().order_by('-created_at')
@@ -123,6 +149,7 @@ def daftar_pasien(request): # UDAH FIX
 
     return render(request, 'core/pasien.html', context)
 
+@never_cache
 @login_required
 def tambah_pasien(request): # UDAH FIX
     if request.method == 'POST':
@@ -152,9 +179,11 @@ def tambah_pasien(request): # UDAH FIX
     }
     return render(request, 'core/pasien_form.html', context)
 
+@never_cache
 @login_required
-def detail_pasien(request, pk): # UDAH FIX
-    pasien = get_object_or_404(Pasien, pk=pk)
+def detail_pasien(request, hash_id): # UDAH FIX
+    pasien_id = decode_hash(hash_id)
+    pasien = get_object_or_404(Pasien, id=pasien_id)
 
     breadcrumbs = [
         {'title': 'Pasien', 'url': '/pasien/'},
@@ -169,9 +198,11 @@ def detail_pasien(request, pk): # UDAH FIX
     }
     return render(request, 'core/pasien_detail.html', context)
 
+@never_cache
 @login_required
-def edit_pasien(request, pk): # UDAH FIX
-    pasien = get_object_or_404(Pasien, pk=pk)
+def edit_pasien(request, hash_id): # UDAH FIX
+    pasien_id = decode_hash(hash_id)
+    pasien = get_object_or_404(Pasien, id=pasien_id)
 
     if request.method == 'POST':
         form = PasienForm(request.POST, instance=pasien)
@@ -202,12 +233,14 @@ def edit_pasien(request, pk): # UDAH FIX
     }
     return render(request, 'core/pasien_form.html', context)   
 
+@never_cache
 @login_required
-def riwayat_rekam_medis_pasien(request, pasien_id): # UDAH FIX
+def riwayat_rekam_medis_pasien(request, hash_id): # UDAH FIX
+    pasien_id = decode_hash(hash_id)
     pasien = get_object_or_404(Pasien, id=pasien_id)
 
     # Mengambil semua rekam medis dari pasien ini via relasi ke Registrasi
-    rekam_list = RekamMedis.objects.select_related('registrasi', 'kode_diagnosis') \
+    rekam_list = RekamMedis.objects.select_related('registrasi') \
         .filter(registrasi__pasien=pasien) \
         .order_by('-created_at')
 
@@ -227,8 +260,10 @@ def riwayat_rekam_medis_pasien(request, pasien_id): # UDAH FIX
 
     return render(request, 'core/pasien_riwayat_rm.html', context)
 
+@never_cache
 @login_required
-def buat_registrasi_pasien_auto(request, pasien_id): # UDAH FIX 
+def buat_registrasi_pasien_auto(request, hash_id): # UDAH FIX 
+    pasien_id = decode_hash(hash_id)
     pasien = get_object_or_404(Pasien, id=pasien_id)
     today = timezone.localdate()
 
@@ -241,9 +276,11 @@ def buat_registrasi_pasien_auto(request, pasien_id): # UDAH FIX
     messages.success(request, f"Registrasi {pasien.nama_lengkap} berhasil dibuat.")
     return redirect('daftar_pasien')
 
+@never_cache
 @login_required
-def nonaktifkan_pasien(request, pk): # UDAH FIX 
-    pasien = get_object_or_404(Pasien, pk=pk)
+def nonaktifkan_pasien(request, hash_id): # UDAH FIX 
+    pasien_id = decode_hash(hash_id)
+    pasien = get_object_or_404(Pasien, id=pasien_id)
     pasien.status = StatusPasienChoices.NONAKTIF
     pasien.save()
     messages.warning(request, "Pasien telah dinonaktifkan")
@@ -253,6 +290,7 @@ def nonaktifkan_pasien(request, pk): # UDAH FIX
 ####################################################################################################################################################################################
 ################################################################################# FITUR REGISTRASI #################################################################################
 ####################################################################################################################################################################################
+@never_cache
 @login_required
 def daftar_registrasi(request): # UDAH FIX 
     batas_waktu = timezone.now() - timedelta(hours=24)
@@ -303,9 +341,11 @@ def daftar_registrasi(request): # UDAH FIX
 
     return render(request, 'core/registrasi.html', context)
 
+@never_cache
 @login_required
-def batalkan_registrasi(request, pk): # UDAH FIX
-    registrasi = get_object_or_404(Registrasi, pk=pk)
+def batalkan_registrasi(request, hash_id): # UDAH FIX
+    registrasi_id = decode_hash(hash_id)
+    registrasi = get_object_or_404(Registrasi, id=registrasi_id)
     registrasi.status = StatusRegistrasiChoices.BATAL
     registrasi.save()
     messages.warning(request, "Registrasi dibatalkan.")
@@ -317,6 +357,7 @@ def batalkan_registrasi(request, pk): # UDAH FIX
 #####################################################################################################################################################################################
 ################################################################################# FITUR REKAM MEDIS #################################################################################
 #####################################################################################################################################################################################
+@never_cache
 @login_required
 def daftar_rekam_medis(request):
     tanggal_filter = request.GET.get('tanggal')
@@ -355,8 +396,10 @@ def daftar_rekam_medis(request):
 
     return render(request, 'core/rekam_medis.html', context)
 
+@never_cache
 @login_required
-def buat_rekam_medis(request, registrasi_id):
+def buat_rekam_medis(request, hash_id):
+    registrasi_id = decode_hash(hash_id)
     registrasi = get_object_or_404(Registrasi, id=registrasi_id)
     pasien = registrasi.pasien
 
@@ -366,7 +409,7 @@ def buat_rekam_medis(request, registrasi_id):
     ).order_by('-created_at').first()
 
     # Mengambil semua rekam medis si pasien ini (riwayat juga tapi lebih detail)
-    rekam_list = RekamMedis.objects.select_related('registrasi', 'kode_diagnosis') \
+    rekam_list = RekamMedis.objects.select_related('registrasi') \
         .filter(registrasi__pasien=pasien) \
         .order_by('-created_at')
     
@@ -411,8 +454,10 @@ def buat_rekam_medis(request, registrasi_id):
     }
     return render(request, 'core/rekam_medis_form.html', context)
 
+@never_cache
 @login_required
-def edit_rekam_medis(request, rekam_id):
+def edit_rekam_medis(request, hash_id):
+    rekam_id = decode_hash(hash_id)
     rekam = get_object_or_404(RekamMedis, id=rekam_id)
     pasien = rekam.registrasi.pasien
 
@@ -420,7 +465,7 @@ def edit_rekam_medis(request, rekam_id):
         registrasi__pasien=pasien
     ).exclude(id=rekam_id).order_by('-created_at').first()
 
-    rekam_list = RekamMedis.objects.select_related('registrasi', 'kode_diagnosis') \
+    rekam_list = RekamMedis.objects.select_related('registrasi') \
         .filter(registrasi__pasien=pasien) \
         .order_by('-created_at')
     
@@ -461,8 +506,10 @@ def edit_rekam_medis(request, rekam_id):
     }
     return render(request, 'core/rekam_medis_form.html', context)
 
+@never_cache
 @login_required
-def detail_rekam_medis(request, rekam_id):
+def detail_rekam_medis(request, hash_id):
+    rekam_id = decode_hash(hash_id)
     rekam = get_object_or_404(RekamMedis, id=rekam_id)
     pasien = rekam.registrasi.pasien
 
@@ -480,8 +527,10 @@ def detail_rekam_medis(request, rekam_id):
     }
     return render(request, 'core/rekam_medis_detail.html', context)
 
+@never_cache
 @login_required
-def resume_medis_view(request, rekam_id):
+def resume_medis_view(request, hash_id):
+    rekam_id = decode_hash(hash_id)
     rekam = get_object_or_404(RekamMedis, id=rekam_id)
     pasien = rekam.registrasi.pasien
 

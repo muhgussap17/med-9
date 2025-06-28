@@ -9,6 +9,10 @@
     {% endif %}
 {% endblock %}
 
+
+{% block extra_css %}
+{% endblock %}
+
 {% block content %}
 <!-- Header -->
 <div class="header pb-6">
@@ -291,34 +295,13 @@
     <!-- End Form Tambah Pasien -->
      
     <!-- Footer -->
-    <footer class="footer pt-0">
-        <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6">
-                <div class="copyright text-center text-lg-left text-muted">
-                    &copy; 2025 <a href="#" class="font-weight-bold ml-1" target="_blank">Kelompok 9 RPL</a>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">About Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">Blog</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" target="_blank">License</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </footer>
+    {% include 'partials/footer.html' %}
     <!-- End Footer -->
 </div>
 <!-- End Page content -->
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
     <!-- Datepicker halaman tambah pasien -->
     <script>
         $(document).ready(function () {
@@ -329,6 +312,7 @@
             });
         });
     </script>
+    
     <!-- Script toggle input halmaan tambah pasien-->
     <script>
         function toggleAsuransiInput() {
@@ -341,25 +325,5 @@
     
         // Inisialisasi saat halaman dimuat (jika form digunakan kembali)
         document.addEventListener('DOMContentLoaded', toggleAsuransiInput);
-    </script>
-    <script>
-        // Example starter JavaScript for disabling form submissions if there are invalid fields
-        (function() {
-        'use strict';
-        window.addEventListener('load', function() {
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-            var forms = document.getElementsByClassName('needs-validation');
-            // Loop over them and prevent submission
-            var validation = Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-            });
-        }, false);
-        })();
     </script>
 {% endblock %}
