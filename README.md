@@ -38,8 +38,6 @@ Live Demo: [https://muhgussap.pythonanywhere.com](https://muhgussap.pythonanywhe
 - Dashboard UI based on Argon Dashboard PRO (Bootstrap 4)
 - Responsive design with HTML, CSS, and custom SCSS
 - Google OAuth2 authentication support
-- Interactive charts and Google Maps integration
-- Notification and calendar features
 
 ---
 
