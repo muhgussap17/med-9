@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="static/assets/img/white.svg" alt="Project Logo" width="200"/>
+</p>
+
 # med-9
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
